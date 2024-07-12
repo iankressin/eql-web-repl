@@ -27,6 +27,7 @@
     function handleKeyPress(key: KeyboardEvent) {
         if (key.key === 'Enter') {
             onsubmit(query)
+            query = ''
         }
     }
 </script>
