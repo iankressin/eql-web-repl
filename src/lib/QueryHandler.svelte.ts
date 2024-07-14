@@ -37,8 +37,7 @@ export interface Result {
 }
 
 export class QueryHandler {
-	// private static readonly API_URL = 'https://eql-api.onrender.com/run-query';
-	private static readonly API_URL = 'http://localhost:3000/run-query';
+	private static readonly API_URL = 'https://eql-api.onrender.com/run-query';
 	public readonly results = $state<Result[]>([]);
 
 	public async runQuery(query: string): Promise<void> {
