@@ -5,6 +5,26 @@
 
 	let selectedPannel = $state(0);
 	let panels = ['output', 'tips', 'install eql'];
+
+	let resizableContainer: HTMLElement;
+	let startY: number, startHeight: number;
+
+	function mouseDownHandler(e: MouseEvent) {
+		startY = e.clientY;
+		startHeight = resizableContainer.offsetHeight;
+		document.documentElement.addEventListener('mousemove', mouseMoveHandler);
+		document.documentElement.addEventListener('mouseup', mouseUpHandler);
+	}
+
+	function mouseMoveHandler(e: MouseEvent) {
+		const newHeight = startHeight - (e.clientY - startY);
+		resizableContainer.style.height = `${newHeight}px`;
+	}
+
+	function mouseUpHandler() {
+		document.documentElement.removeEventListener('mousemove', mouseMoveHandler);
+		document.documentElement.removeEventListener('mouseup', mouseUpHandler);
+	}
 </script>
 
 <div>
@@ -20,7 +40,9 @@
 		{/each}
 	</div>
 
+    <div class="w-full h-1 bg-dim-0 cursor-row-resize" onmousedown={mouseDownHandler} role="row" tabindex="0"></div>
 	<div
+		bind:this={resizableContainer}
 		class="w-full bg-dim-0 h-96 px-8 py-8 flex flex-col gap-8 relative overflow-y-auto transition-all"
 	>
 		{#if selectedPannel === 0}
@@ -34,3 +56,4 @@
 		{/if}
 	</div>
 </div>
+
