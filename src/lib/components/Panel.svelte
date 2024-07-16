@@ -40,10 +40,15 @@
 		{/each}
 	</div>
 
-    <div class="w-full h-1 bg-dim-0 cursor-row-resize" onmousedown={mouseDownHandler} role="row" tabindex="0"></div>
+	<div
+		class="w-full h-3 bg-dim-0 cursor-row-resize"
+		onmousedown={mouseDownHandler}
+		role="row"
+		tabindex="0"
+	></div>
 	<div
 		bind:this={resizableContainer}
-		class="w-full bg-dim-0 h-96 px-8 py-8 flex flex-col gap-8 relative overflow-y-auto transition-all"
+		class="w-full bg-dim-0 h-96 px-8 py-8 flex flex-col gap-8 transition-all"
 	>
 		{#if selectedPannel === 0}
 			<Results />
@@ -56,4 +61,3 @@
 		{/if}
 	</div>
 </div>
-

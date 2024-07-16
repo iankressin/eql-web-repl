@@ -16,7 +16,7 @@
 					<span>{key}</span>
 				</div>
 				<div class="flex border-l p-2" class:border-l={index > 0}>
-					<span>{value || '-'}</span>
+					<span>{value ?? '-'}</span>
 				</div>
 			</div>
 		{/each}
