@@ -11,7 +11,7 @@
 		property="og:description"
 		content="EQL is a language that allows you to query the Ethereum Virtual Machine (EVM) using a SQL-like syntax. It is designed to be the simplest way to ask blockchain questions and get answers."
 	/>
-	<meta property="og:image" content="https://https://eql-app.vercel.app/open-graph.png" />
+	<meta property="og:image" content="https://eql-app.vercel.app/open-graph.png" />
 	<meta property="og:url" content="" />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="EQL - EVM Query Language" />
@@ -25,7 +25,7 @@
 		name="twitter:description"
 		content="EQL is a language that allows you to query the Ethereum Virtual Machine (EVM) using a SQL-like syntax. It is designed to be the simplest way to ask blockchain questions and get answers."
 	/>
-	<meta name="twitter:image" content="https://yourwebsite.com/path/to/thumbnail.jpg" />
+	<meta name="twitter:image" content="https://eql-app.vercel.app/twitter-card-image.png" />
 	<meta name="twitter:url" content="https://yourwebsite.com/page-url" />
 	<meta name="twitter:site" content="@iankguimaraes" />
 
