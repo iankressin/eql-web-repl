@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { queryHandler } from '$lib/QueryHandler.svelte';
 	import ResultTable from '$lib/components/ResultTable.svelte';
+	import Spinner from './Spinner.svelte';
 
 	let lastItem = $derived(queryHandler.results.length);
 	let fetching = $derived(queryHandler.fetchingQuery);
@@ -41,6 +42,6 @@
 	{/if}
 
 	{#if queryHandler.fetchingQuery}
-		<span id="loading"> > Loading</span>
+		<Spinner />
 	{/if}
 </div>
