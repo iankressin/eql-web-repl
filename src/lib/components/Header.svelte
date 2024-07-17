@@ -1,8 +1,6 @@
 <header class="p-8 flex justify-between">
 	<div class="text-red text-xl">EVM Query Languange</div>
 	<div class="text-lg text-gray">
-		<a href="/release" class="hover:text-white transition-colors">Release notes</a>
-		|
 		<a
 			href="https://github.com/iankressin/eql"
 			target="_blank"
