@@ -25,7 +25,7 @@
 	});
 
 	function handleKeyPress(key: KeyboardEvent) {
-		if (key.key === 'Enter') {
+		if (key.key === 'Enter' && query !== '') {
 			onsubmit(query);
 			query = '';
 		}

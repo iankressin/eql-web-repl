@@ -9,8 +9,6 @@
 			Github
 		</a>
 		|
-		<a href="/about" class="hover:text-white transition-colors">Research</a>
-		|
 		<a
 			href="https://x.com/iankguimaraes"
 			target="_blank"
