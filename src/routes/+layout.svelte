@@ -1,6 +1,8 @@
 <script lang="ts">
 	import '../app.css';
+	import '../syntax.css';
 	import { inject } from '@vercel/analytics';
+	import Header from '$lib/components/Header.svelte';
 
 	inject();
 </script>
@@ -47,6 +49,7 @@
 	<meta property="og:logo" content="your value" />
 </svelte:head>
 
-<div class="bg-dim-1 text-white font-mono h-full">
+<div class="bg-dim-1 text-white font-mono h-full overflow-auto">
+	<Header />
 	<slot />
 </div>
