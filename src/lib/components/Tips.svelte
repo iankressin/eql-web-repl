@@ -40,6 +40,7 @@
 						<li>address [id]</li>
 						<li>nonce</li>
 						<li>balance</li>
+						<li>code</li>
 					</ul>
 				</div>
 
@@ -47,10 +48,22 @@
 					<p class="text-yellow">Block</p>
 					<ul class="list-disc list-inside">
 						<li>number [id]</li>
-						<li>hash</li>
 						<li>timestamp</li>
 						<li>size</li>
+						<li>hash</li>
 						<li>parent_hash</li>
+						<li>state_root</li>
+						<li>transactions_root</li>
+						<li>receipts_root</li>
+						<li>logs_bloom</li>
+						<li>extra_data</li>
+						<li>mix_hash</li>
+						<li>total_difficulty</li>
+						<li>base_fee_per_gas</li>
+						<li>withdrawals_root</li>
+						<li>blob_gas_used</li>
+						<li>excess_blob_gas</li>
+						<li>parent_beacon_block_root</li>
 					</ul>
 				</div>
 
@@ -58,14 +71,22 @@
 					<p class="text-yellow">Transaction</p>
 					<ul class="list-disc list-inside">
 						<li>hash [id]</li>
+						<li>transaction_type</li>
 						<li>from</li>
 						<li>to</li>
-						<li>value</li>
 						<li>data</li>
-						<li>fee</li>
+						<li>value</li>
 						<li>gas_price</li>
-						<li>timestamp</li>
+						<li>gas</li>
 						<li>status</li>
+						<li>chain_id</li>
+						<li>v</li>
+						<li>r</li>
+						<li>s</li>
+						<li>max_fee_per_blob_gas</li>
+						<li>max_fee_per_gas</li>
+						<li>max_priority_fee_per_gas</li>
+						<li>y_parity</li>
 					</ul>
 				</div>
 			</div>
