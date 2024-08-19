@@ -23,7 +23,7 @@ interface Transaction {
 }
 
 interface ApiResponse {
-	result: { query: string; result: Block | Transaction | Account }[];
+	result: { query: string; result: Block[] | Transaction[] | Account[] }[];
 	error: {
 		query: string;
 		message: string;
@@ -32,13 +32,13 @@ interface ApiResponse {
 
 export interface Result {
 	query: string;
-	result?: Block | Transaction | Account;
+	result?: Block[] | Transaction[] | Account[];
 	error?: string;
 }
 
 export class QueryHandler {
 	private static readonly API_URL = 'https://eql-api.vercel.app/api/run';
-	public readonly results = $state<Result[]>([]);
+	public results = $state<Result[]>([]);
 	private _fetchingQuery = $state(false);
 
 	public async runQuery(query: string): Promise<void> {
@@ -54,9 +54,7 @@ export class QueryHandler {
 					error: error.message
 				});
 			} else if (result && result.length > 0) {
-				this.results.push({
-					...result[0]
-				});
+				this.results = result;
 			} else {
 				this.results.push({
 					query,
