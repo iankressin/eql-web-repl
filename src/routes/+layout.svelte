@@ -49,7 +49,7 @@
 	<meta property="og:logo" content="your value" />
 </svelte:head>
 
-<div class="bg-dim-1 text-white font-mono h-full overflow-auto">
+<div class="bg-dim-1 text-white font-mono h-full overflow-y-hidden">
 	<Header />
 	<slot />
 </div>

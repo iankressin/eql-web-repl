@@ -107,6 +107,38 @@
 		</div>
 
 		<div class="flex flex-col gap-4">
+			<h3 class="text-lg font-bold text-orange">Ranges</h3>
+			<div class="flex flex-col gap-2">
+				<p>EQL support block ranges using the syntax below</p>
+				<code class="bg-black p-4 w-full rounded-md">
+					GET &lt[fields,]&gt FROM block &ltstart&gt:&ltend&gt ON &ltchain&gt
+				</code>
+				<p>
+					<i>Start</i> and <i>end</i> must be valid block tags or numbers where <i>start</i> &lt
+					<i>end</i>
+				</p>
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<p class="text-yellow"><b>Supported block tags</b></p>
+				<ul class="list-disc list-inside">
+					<li>latest</li>
+					<li>earliest</li>
+					<li>pending</li>
+					<li>finalized</li>
+					<li>safe</li>
+				</ul>
+			</div>
+
+			<div class="flex flex-col gap-2">
+				<p class="text-yellow"><b>Example</b></p>
+				<code class="bg-black p-4 w-full rounded-md">
+					GET size, hash, timestamp FROM block 1:10 ON eth
+				</code>
+			</div>
+		</div>
+
+		<div class="flex flex-col gap-4">
 			<h3 class="text-lg font-bold text-orange">Examples</h3>
 
 			<div class="flex flex-col gap-2">
