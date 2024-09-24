@@ -10,9 +10,10 @@
 	} = $props();
 	let inputElement: HTMLInputElement;
 	const placeholders = [
-		'GET from, to, value FROM tx 0x00000000219ab540356cbb839cbe05303d7705fa ON eth',
-		'GET hash, timestamp, size FROM block 123847 ON polygon',
-		'GET nonce, balance FROM account 0xa50a9587ca01ac32590d3bf4dcb8c012166f18845ef170ef149d76bde100430b ON arb'
+		'GET * FROM account vitalik.eth ON base',
+		'GET from, to, value FROM tx 0xa50a9587ca01ac32590d3bf4dcb8c012166f18845ef170ef149d76bde100430b  ON eth',
+		'GET hash, timestamp, size FROM block 123847 ON polygon > blocks.json',
+		'GET nonce, balance FROM account 0x00000000219ab540356cbb839cbe05303d7705fa ON arb'
 	];
 	let currentPlaceholder = $state(0);
 
