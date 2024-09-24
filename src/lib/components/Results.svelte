@@ -16,6 +16,18 @@
 	<button class="absolute text-gray right-8" onclick={() => queryHandler.clearResults()}>
 		Clear
 	</button>
+	{#if queryHandler.results.length === 0 && !queryHandler.dumpFile}
+		<span class="text-gray">Waiting for queries...</span>
+	{/if}
+
+	{#if queryHandler.dumpFile}
+		<span>
+			<a href={queryHandler.dumpFile.url} download={queryHandler.dumpFile.name} class="text-orange"
+				>Click here</a
+			>
+			to download the {queryHandler.dumpFile.name}.
+		</span>
+	{/if}
 
 	{#if queryHandler.results.length > 0}
 		{#each queryHandler.results as result, index}
@@ -37,8 +49,6 @@
 				</div>
 			</div>
 		{/each}
-	{:else}
-		<span class="text-gray">Waiting for queries...</span>
 	{/if}
 
 	{#if queryHandler.fetchingQuery}

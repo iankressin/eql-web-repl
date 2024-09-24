@@ -36,30 +36,50 @@ export interface Result {
 	error?: string;
 }
 
+interface DumpFile {
+	url: string;
+	name: string;
+}
+
 export class QueryHandler {
 	private static readonly API_URL = 'https://eql-api.vercel.app/api/run';
 	public results = $state<Result[]>([]);
+	public dumpFile: DumpFile | null = $state(null);
 	private _fetchingQuery = $state(false);
 
 	public async runQuery(query: string): Promise<void> {
 		this._fetchingQuery = true;
+		this.dumpFile = null;
+		this.results = [];
 
 		try {
 			const res = await fetch(`${QueryHandler.API_URL}?query=${query.replace(/\s/g, '+')}`);
-			const { result, error } = (await res.json()) as ApiResponse;
+			const resContentType = res.headers.get('Content-Type');
 
-			if (error) {
-				this.results.push({
-					query: error.query,
-					error: error.message
-				});
-			} else if (result && result.length > 0) {
-				this.results = result;
-			} else {
-				this.results.push({
-					query,
-					error: 'No results found'
-				});
+			if (resContentType?.includes('application/json')) {
+				const { result, error } = (await res.json()) as ApiResponse;
+
+				if (error) {
+					this.results.push({
+						query: error.query,
+						error: error.message
+					});
+				} else if (result && result.length > 0) {
+					this.results = result;
+				} else {
+					this.results.push({
+						query,
+						error: 'No results found'
+					});
+				}
+			} else if (resContentType?.includes('application/octet-stream')) {
+				const blob = await res.blob();
+				const disposition = res.headers.get('Content-Disposition');
+
+				this.dumpFile = {
+					url: URL.createObjectURL(blob),
+					name: disposition?.split('filename=')[1].replaceAll('"', '').trim() || 'dump'
+				};
 			}
 		} finally {
 			this._fetchingQuery = false;
@@ -67,8 +87,7 @@ export class QueryHandler {
 	}
 
 	public clearResults(): void {
-		console.log('clearing results');
-
+		this.dumpFile = null;
 		this.results.splice(0, this.results.length);
 	}
 
