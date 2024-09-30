@@ -12,11 +12,17 @@
         [&>h4]:text-lg [&>h4]:font-bold [&>h4]:mt-2 [&>h4]:font-sans [&>h4]:text-yellow
         [&>blockquote]:px-4 [&>blockquote]:border-l-4 [&>blockquote]:italic
         [&>pre]:bg-stone-900 [&>pre]:p-4 [&>pre]:rounded [&>pre]:text-sm
-        [&>p>a]:text-blue-400 [&>p>a]:underline [&>p>a]:underline-offset-2
-        [&>p>em]:text-xl [&>p>em]:text-center
-        [&>ul>li]:list-disc [&>ul]:gap-2 [&>ul]:flex [&>ul]:flex-col
-        [&>ul>li>ul]:list-[circle] [&>ul>li>ul]:px-8
+        [&>p>a]:text-orange [&>p>a]:underline [&>p>a]:underline-offset-2
+        [&>p>em]:text-xl [&>p>em]:text-center [&>p>code]:text-[16px] [&>p>code]:text-green
+        [&>ul>li]:list-disc [&>ul]:gap-2 [&>ul]:flex [&>ul]:flex-col [&>ul>li>code]:text-green [&>ul>li>code]:text-[16px]
+        [&>ul>li>ul]:list-circle [&>ul>li>ul]:px-8
         [&>ul>li>p>code]:bg-stone-900 [&>ul>li>p>code]:p-1 [&>ul>li>p>code]:rounded [&>ul>li>p>code]:text-sm
+        [&>table]:text-[16px] [&>table>thead>tr>th]:text-left [&>table]:font-mono
+        [&>table]:border [&>table]:rounded [&>table>tr]:p-4
+        [&>table]:table-auto [&>table]:border-separate [&>table]:border-spacing-0 [&>table]:rounded-xl [&>table]:overflow-hidden
+        [&>table>thead>tr>th]:px-4 [&>table>thead>tr>th]:py-2 [&>table>tbody>tr>td]:px-4 [&>table>tbody>tr>td]:py-2
+        [&>table>tbody>tr>td]:border-t [&>table>tbody>tr>td]:border-l
+        [&>table>thead>tr>th]:border-l [&>p>img]:mt-3 [&>p>em]:text-blue
     "
 	>
 		<svelte:component this={data.content} />

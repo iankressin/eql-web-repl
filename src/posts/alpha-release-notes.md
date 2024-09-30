@@ -119,7 +119,7 @@ GET from, value, to FROM tx 0x... ON arb
 
 You can see a full list of supported entities, fields, and chains [here](https://github.com/iankressin/eql).
 ## Try the alpha now
-Web-based REPL: [https://eql-app.vercel.app/](https://eql-app.vercel.app/)  
+Web-based REPL: [https://eql.sh/](https://eql.sh/)  
 CLI and REPL: [https://github.com/iankressin/eql](https://github.com/iankressin/eql)  
 Rust: [https://crates.io/crates/eql_core](https://crates.io/crates/eql_core)  
 Typescript: soon!
