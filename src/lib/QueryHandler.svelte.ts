@@ -50,7 +50,6 @@ export class QueryHandler {
 	public async runQuery(query: string): Promise<void> {
 		this._fetchingQuery = true;
 		this.dumpFile = null;
-		this.results = [];
 
 		try {
 			const res = await fetch(`${QueryHandler.API_URL}?query=${query.replace(/\s/g, '+')}`);
@@ -65,7 +64,7 @@ export class QueryHandler {
 						error: error.message
 					});
 				} else if (result && result.length > 0) {
-					this.results = result;
+					this.results.push(...result.map(({ query, result }) => ({ query, result })));
 				} else {
 					this.results.push({
 						query,
