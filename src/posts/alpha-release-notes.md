@@ -1,3 +1,12 @@
+---
+title: EVM Query Language Alpha Release
+description: The first release of the EVM Query Language (EQL), a SQL-like language designed to query EVM chains.
+date: '2024-07-24'
+categories:
+  - Release
+published: true
+---
+
 # EVM Query Language Alpha Release
 
 Today marks the alpha release of the EVM Query Language (EQL), a SQL-like language designed to query EVM chains. Its ultimate goal is to support complex relational queries on EVM chain first-class citizens (blocks, accounts, and transactions) while providing developers and researchers with an ergonomic syntax for everyday use.

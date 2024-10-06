@@ -3,7 +3,9 @@
 		<a href="/">EVM Query Languange</a>
 	</div>
 	<div class="text-lg text-gray">
-		<a href="/blog/alpha-release-notes" class="hover:text-white transition-colors">Release notes</a>
+		<a href="/" class="hover:text-white transition-colors">Home</a>
+		|
+		<a href="/blog" class="hover:text-white transition-colors">Blog</a>
 		|
 		<a
 			href="https://github.com/iankressin/eql"

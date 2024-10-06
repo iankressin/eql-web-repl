@@ -1,3 +1,12 @@
+---
+title: How is different from Dune?
+description: A comparison between EQL and Dune, two platforms for querying blockchain data, highlighting their differences in design, performance, and use cases.
+date: '2024-09-30'
+categories:
+  - Research
+published: true
+---
+
 # How is different from Dune?
 
 The title of this article captures the initial reaction many people have when they first learn about EVM Query Language (EQL). Although there are surface-level similarities between EQL and Dune, these two projects are fundamentally distinct in their goals, design, and use cases.
