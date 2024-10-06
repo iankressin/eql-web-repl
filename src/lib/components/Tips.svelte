@@ -1,5 +1,5 @@
 <div class="overflow-y-auto flex flex-col gap-4">
-	<h2 class="text-xl font-bold intalic text-orange">Tips</h2>
+	<h2 class="text-xl font-bold intalic text-orange">How to query</h2>
 	<div class="flex flex-col gap-10 max-w-[1200px]">
 		<p class="p">
 			EQL is a language that allows you to query the Ethereum Virtual Machine (EVM) using a SQL-like
@@ -101,7 +101,27 @@
 					<li>arb</li>
 					<li>op</li>
 					<li>base</li>
+					<li>blast</li>
 					<li>polygon</li>
+					<li>sepolia</li>
+					<li>anvil</li>
+					<li>local</li>
+					<li>mantle</li>
+					<li>zksync</li>
+					<li>taiko</li>
+					<li>celo</li>
+					<li>avalanche</li>
+					<li>scroll</li>
+					<li>bnb</li>
+					<li>linea</li>
+					<li>tron</li>
+					<li>zora</li>
+					<li>moonbeam</li>
+					<li>moonriver</li>
+					<li>ronin</li>
+					<li>fantom</li>
+					<li>kava</li>
+					<li>gnosis</li>
 				</ul>
 			</div>
 		</div>

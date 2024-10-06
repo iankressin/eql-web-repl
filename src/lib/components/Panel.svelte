@@ -4,7 +4,7 @@
 	import InstallEql from './InstallEql.svelte';
 
 	let selectedPannel = $state(0);
-	let panels = ['output', 'tips', 'install eql'];
+	let panels = ['output', 'how to query', 'install eql'];
 
 	let resizableContainer: HTMLElement;
 	let startY: number, startHeight: number;
