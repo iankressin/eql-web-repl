@@ -10,7 +10,7 @@
 </script>
 
 <div class="border border-blue rounded-md text-blue w-fit">
-	<div class="grid" style={`grid-template-columns: repeat(${keys.length}, minmax(0, auto))`}>
+	<div class="grid" style={`grid-template-columns: repeat(${keys.length}, minmax(auto, auto))`}>
 		{#each keys as key, index}
 			<div>
 				<div class="flex p-2 border-l border-b" class:border-l={index > 0}>
