@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 
 	let {
@@ -28,9 +30,20 @@
 	function handleKeyPress(key: KeyboardEvent) {
 		if (key.key === 'Enter' && query !== '') {
 			onsubmit(query);
+			updateQueryString();
 			query = '';
 		}
 	}
+
+	function updateQueryString() {
+		$page.url.searchParams.set('query', query);
+		goto(`?${$page.url.searchParams.toString()}`);
+	}
+
+	onMount(() => {
+		const params = new URLSearchParams(location.search);
+		query = params.get('query') || '';
+	});
 </script>
 
 <div class="p-8 text-2xl gap-4 flex justify-center items-center">

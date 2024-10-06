@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { queryHandler } from '$lib/QueryHandler.svelte';
 	import ResultTable from '$lib/components/ResultTable.svelte';
+	import { openModal } from '$lib/stores/modal.svelte';
+	import Share from './Share.svelte';
 	import Spinner from './Spinner.svelte';
 
 	let lastItem = $derived(queryHandler.results.length);
@@ -22,9 +24,9 @@
 
 	{#if queryHandler.dumpFile}
 		<span>
-			<a href={queryHandler.dumpFile.url} download={queryHandler.dumpFile.name} class="text-orange"
-				>Click here</a
-			>
+			<a href={queryHandler.dumpFile.url} download={queryHandler.dumpFile.name} class="text-orange">
+				Click here
+			</a>
 			to download the {queryHandler.dumpFile.name}.
 		</span>
 	{/if}
@@ -35,6 +37,10 @@
 				<div>
 					<span class="text-lg">
 						> {result.query}
+						<button
+							onclick={() => openModal(shareQuery, { dismissible: true, param: result.query })}
+							class="text-gray text-sm">Share</button
+						>
 					</span>
 				</div>
 				<div>
@@ -55,3 +61,7 @@
 		<Spinner />
 	{/if}
 </div>
+
+{#snippet shareQuery(query: string)}
+	<Share {query} />
+{/snippet}

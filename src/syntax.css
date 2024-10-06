@@ -1,6 +1,8 @@
-code[class*="language-"],
-pre[class*="language-"] {
-	font-family: Consolas, Menlo, Monaco, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", "Courier New", Courier, monospace;
+code[class*='language-'],
+pre[class*='language-'] {
+	font-family: Consolas, Menlo, Monaco, 'Andale Mono WT', 'Andale Mono', 'Lucida Console',
+		'Lucida Sans Typewriter', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Liberation Mono',
+		'Nimbus Mono L', 'Courier New', Courier, monospace;
 	font-size: 14px;
 	line-height: 1.375;
 	direction: ltr;
@@ -21,33 +23,37 @@ pre[class*="language-"] {
 	color: #ddd8be;
 }
 
-pre > code[class*="language-"] {
+pre > code[class*='language-'] {
 	font-size: 1em;
 }
 
-pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
-code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+pre[class*='language-']::-moz-selection,
+pre[class*='language-'] ::-moz-selection,
+code[class*='language-']::-moz-selection,
+code[class*='language-'] ::-moz-selection {
 	text-shadow: none;
 	background: #232a2e;
 }
 
-pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
-code[class*="language-"]::selection, code[class*="language-"] ::selection {
+pre[class*='language-']::selection,
+pre[class*='language-'] ::selection,
+code[class*='language-']::selection,
+code[class*='language-'] ::selection {
 	text-shadow: none;
 	background: #232a2e;
 }
 
 /* Code blocks */
-pre[class*="language-"] {
+pre[class*='language-'] {
 	padding: 1em;
-	margin: .5em 0;
+	margin: 0.5em 0;
 	overflow: auto;
 }
 
 /* Inline code */
-:not(pre) > code[class*="language-"] {
-	padding: .1em;
-	border-radius: .3em;
+:not(pre) > code[class*='language-'] {
+	padding: 0.1em;
+	border-radius: 0.3em;
 }
 
 .token.comment,
@@ -62,11 +68,11 @@ pre[class*="language-"] {
 }
 
 .token.namespace {
-	opacity: .7;
+	opacity: 0.7;
 }
 
 .token.class-name {
-    color: #f0c674;
+	color: #f0c674;
 }
 
 .token.tag,
@@ -76,7 +82,7 @@ pre[class*="language-"] {
 }
 
 .token.property {
-    color: #d699b6;
+	color: #d699b6;
 }
 
 .token.function {
@@ -97,7 +103,7 @@ code.language-javascript,
 code.language-css,
 code.language-scss,
 .token.string {
-    color: #83c092;
+	color: #83c092;
 }
 
 code.language-css,
@@ -151,8 +157,8 @@ code.language-scss,
 }
 
 pre > code.highlight {
-	outline: .4em solid #34659d;
-	outline-offset: .4em;
+	outline: 0.4em solid #34659d;
+	outline-offset: 0.4em;
 }
 
 /* overrides color-values for the Line Numbers plugin
@@ -174,4 +180,3 @@ pre > code.highlight {
 	background: -webkit-linear-gradient(left, rgba(10, 163, 112, 0.2) 70%, rgba(10, 163, 112, 0));
 	background: linear-gradient(to right, rgba(10, 163, 112, 0.2) 70%, rgba(10, 163, 112, 0));
 }
-

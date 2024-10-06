@@ -3,6 +3,7 @@
 	import '../syntax.css';
 	import { inject } from '@vercel/analytics';
 	import Header from '$lib/components/Header.svelte';
+	import Modal from '$lib/components/Modal.svelte';
 
 	inject();
 </script>
@@ -50,6 +51,7 @@
 </svelte:head>
 
 <div class="bg-dim-1 text-white font-mono h-full">
+	<Modal />
 	<Header />
 	<slot />
 </div>
