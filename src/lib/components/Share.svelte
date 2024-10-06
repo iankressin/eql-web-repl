@@ -17,7 +17,7 @@
 	};
 
 	// Generate the Twitter and Reddit share URLs
-	const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20this%20out&url=${encodeURIComponent(url.toString())}`;
+	const twitterShareUrl = `https://twitter.com/intent/tweet?text=Check%20out%20this%20EQL%20query&url=${encodeURIComponent(url.toString())}`;
 </script>
 
 <div class="flex flex-col items-center justify-center gap-y-4">
