@@ -1,6 +1,6 @@
 <header class="p-8 flex justify-between">
 	<div class="text-red text-xl">
-		<a href="/">EVM Query Languange</a>
+		<a href="/">EVM Query Language</a>
 	</div>
 	<div class="text-lg text-gray">
 		<a href="/" class="hover:text-white transition-colors">Home</a>
