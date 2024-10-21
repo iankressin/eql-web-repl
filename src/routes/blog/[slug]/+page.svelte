@@ -1,6 +1,14 @@
 <script lang="ts">
-	export let data;
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 </script>
+
+<svelte:head>
+	<title>
+		EQL - {data.meta.title}
+	</title>
+</svelte:head>
 
 <article class="flex flex-col gap-5 bg-dim-1">
 	<div

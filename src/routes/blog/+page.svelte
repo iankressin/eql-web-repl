@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Ian - Essays</title>
+	<title>EQL - Blog</title>
 </svelte:head>
 
 <ContentList list={data.essays} />

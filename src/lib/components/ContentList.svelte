@@ -1,15 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import type { Content } from '$lib/types';
-	import { onMount } from 'svelte';
 
 	const { list }: { list: Content[] } = $props();
-
-	console.log({ list });
-
-	onMount(() => {
-		console.log({ list });
-	});
 </script>
 
 <section class="flex flex-col gap-8">
