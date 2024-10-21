@@ -10,9 +10,9 @@
 		{#each list as content}
 			<a href={`${$page.route.id}/${content.slug}`} class="title">
 				<li class="flex flex-col gap-3">
-					<h1 class="font-semibold text-lg leading-none">{content.title}</h1>
+					<h1 class="font-semibold text-2xl leading-none">{content.title}</h1>
 					{#if content.description}
-						<p class="text-sm leading-none">{content.description}</p>
+						<p class="text-lg">{content.description}</p>
 					{/if}
 					<div class="tags flex gap-2 items-center">
 						{#each content.categories as category}
