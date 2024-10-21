@@ -1,38 +1,11 @@
-interface Account {
-	nonce: number;
-	balance: string;
-	address: string;
-}
-
-interface Block {
-	number: number;
-	timestamp: number;
-	hash: string;
-	size: number;
-	parent_hash: string;
-}
-
-interface Transaction {
-	hash: string;
-	from: string;
-	to: string;
-	data: string;
-	value: string;
-	gas_price: string;
-	status: boolean;
-}
-
 interface ApiResponse {
-	result: { query: string; result: Block[] | Transaction[] | Account[] }[];
-	error: {
-		query: string;
-		message: string;
-	};
+	result: Record<string, object[]>;
+	error: string;
 }
 
 export interface Result {
 	query: string;
-	result?: Block[] | Transaction[] | Account[];
+	result?: object[];
 	error?: string;
 }
 
@@ -42,7 +15,7 @@ interface DumpFile {
 }
 
 export class QueryHandler {
-	private static readonly API_URL = 'https://eql-api.vercel.app/api/run';
+	private static readonly API_URL = 'https://api.eql.sh/run';
 	public results = $state<Result[]>([]);
 	public dumpFile: DumpFile | null = $state(null);
 	private _fetchingQuery = $state(false);
@@ -60,11 +33,14 @@ export class QueryHandler {
 
 				if (error) {
 					this.results.push({
-						query: error.query,
-						error: error.message
+						query,
+						error
 					});
-				} else if (result && result.length > 0) {
-					this.results.push(...result.map(({ query, result }) => ({ query, result })));
+				} else if (result) {
+					this.results.push({
+						result: Object.keys(result).map((k) => result[k]),
+						query
+					});
 				} else {
 					this.results.push({
 						query,
