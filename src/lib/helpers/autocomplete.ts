@@ -3,9 +3,10 @@ import { chains, entityFields, entityFilters, keywords, parseQuery, type Keyword
 const entities = ['account', 'block', 'tx', 'log'] as const;
 type Entities = (typeof entities)[number];
 
-export type Suggestion = { schema: Entities; fields: string[] }[] | string[];
+export type SuggestionWithFields = { schema: Entities; fields: string[] };
+export type Suggestion = SuggestionWithFields | string;
 
-export const suggestions: Record<Keywords, Suggestion> = {
+export const suggestions: Record<Keywords, Suggestion[]> = {
 	GET: [
 		{
 			schema: 'account',
@@ -25,10 +26,11 @@ export const suggestions: Record<Keywords, Suggestion> = {
 		}
 	],
 	FROM: ['account', 'block', 'tx', 'log'],
+	WHERE: [],
 	ON: ['eth', 'arb', 'op', 'base', 'sepolia']
 } as const;
 
-export function autocomplete(query: string): Suggestion {
+export function autocomplete(query: string): Suggestion[] {
 	// Autocomplete only shows suggestions after a keyword and a space. This feels more natural for the user.
 	const lastWord = query.trim().split(' ').pop();
 	const lastWordRaw = query.split(' ').pop();
@@ -67,7 +69,7 @@ export function autocomplete(query: string): Suggestion {
 				typeof suggestion === 'string'
 					? suggestion.includes(lastField)
 					: suggestion.fields.some((field) => field.includes(lastField))
-			) as Suggestion;
+			) as Suggestion[];
 		}
 
 		// Default to showing all GET suggestions

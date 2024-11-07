@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { autocomplete, type Suggestion } from '$lib/helpers/autocomplete';
+	import {
+		autocomplete,
+		type Suggestion,
+		type SuggestionWithFields
+	} from '$lib/helpers/autocomplete';
 	import { ChevronRightIcon } from 'lucide-svelte';
 	import { onMount, type Snippet } from 'svelte';
 
@@ -14,7 +18,7 @@
 	} = $props();
 	let focusedSchemaIndex = $state(0);
 	let focusedFieldIndex = $state(0);
-	let focusedContainerIndex = $state(0);
+	let focusedContainerIndex: number | null = $state(null);
 	let suggestionsVisible = $state(true);
 	const currentSuggestions = $derived(suggestionsVisible ? autocomplete(value) : []);
 
@@ -69,14 +73,14 @@
 		}
 
 		const suggestion = currentSuggestions[focusedSchemaIndex];
-		if (focusedContainerIndex === 0 && suggestion?.fields) {
+		if (focusedContainerIndex === 0 && isSuggestionWithFields(suggestion)) {
 			focusNextContainer();
 		} else {
 			appendSuggestion(suggestion);
 		}
 	}
 
-	function appendSuggestion(suggestion: string | { schema: string; fields: string[] }) {
+	function appendSuggestion(suggestion: Suggestion) {
 		const words = value.split(' ');
 		const lastWord = words.pop() || '';
 
@@ -96,13 +100,17 @@
 			const suggestionCount = currentSuggestions.length;
 			focusedSchemaIndex = (focusedSchemaIndex + direction + suggestionCount) % suggestionCount;
 		} else {
-			const fieldsCount = currentSuggestions[focusedSchemaIndex]?.fields?.length || 0;
-			focusedFieldIndex = (focusedFieldIndex + direction + fieldsCount) % fieldsCount;
+			const suggestion = currentSuggestions[focusedSchemaIndex];
+			if (isSuggestionWithFields(suggestion)) {
+				const fieldsCount = suggestion.fields.length;
+				focusedFieldIndex = (focusedFieldIndex + direction + fieldsCount) % fieldsCount;
+			}
 		}
 	}
 
 	function focusNextContainer() {
-		if (focusedContainerIndex === 0 && currentSuggestions[focusedSchemaIndex]?.fields) {
+		const suggestion = currentSuggestions[focusedSchemaIndex];
+		if (focusedContainerIndex === 0 && isSuggestionWithFields(suggestion)) {
 			focusedContainerIndex = 1;
 			focusedFieldIndex = 0;
 		}
@@ -117,14 +125,21 @@
 	function handleMouseEnter(index: number) {
 		if (focusedContainerIndex === 0) {
 			focusedSchemaIndex = index;
-			if (currentSuggestions[index]?.fields) {
+			const suggestion = currentSuggestions[index];
+			if (typeof suggestion === 'object' && 'fields' in suggestion && suggestion.fields) {
 				focusedContainerIndex = 1;
 				focusedFieldIndex = 0;
 			}
 		}
 	}
 
-	function handleClick(suggestion: string | { schema: string; fields: string[] }) {
+	function isSuggestionWithFields(suggestion: Suggestion): suggestion is SuggestionWithFields {
+		const isObject = typeof suggestion === 'object';
+		const hasFields = isObject && 'fields' in suggestion;
+		return hasFields;
+	}
+
+	function handleClick(suggestion: Suggestion) {
 		appendSuggestion(suggestion);
 	}
 </script>
@@ -132,6 +147,7 @@
 <div class="relative w-full">
 	{@render children()}
 	{#if currentSuggestions.length > 0}
+		{@const suggestion = currentSuggestions[focusedSchemaIndex]}
 		<div class="absolute flex" style="left: {containerPosition}px">
 			<div class="mt-1 bg-dim-0 rounded shadow flex flex-col px-1 py-1 w-fit">
 				{#each currentSuggestions as suggestion, index}
@@ -152,13 +168,13 @@
 					</button>
 				{/each}
 			</div>
-			{#if focusedContainerIndex === 1 && currentSuggestions[focusedSchemaIndex]?.fields}
+			{#if typeof suggestion === 'object' && 'fields' in suggestion && suggestion.fields}
 				<div class="mt-1 bg-dim-0 rounded shadow flex flex-col px-1 py-1">
-					{#each currentSuggestions[focusedSchemaIndex].fields as field, index}
+					{#each suggestion.fields as field, index}
 						<button
 							class="p-1 cursor-pointer text-base text-left rounded"
 							class:bg-dim-2={focusedFieldIndex === index}
-							onclick={() => handleClick({ schema: '', fields: [field] })}
+							onclick={() => handleClick({ schema: suggestion.schema, fields: [field] })}
 						>
 							{field}
 						</button>
