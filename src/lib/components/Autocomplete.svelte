@@ -4,7 +4,7 @@
 	import { onMount, type Snippet } from 'svelte';
 
 	let {
-		value = $bindable(),
+		value = $bindable(''),
 		containerPosition = 0,
 		children
 	}: {
@@ -129,7 +129,7 @@
 	}
 </script>
 
-<div class="relative w-full" bind:this={containerRef}>
+<div class="relative w-full">
 	{@render children()}
 	{#if currentSuggestions.length > 0}
 		<div class="absolute flex" style="left: {containerPosition}px">

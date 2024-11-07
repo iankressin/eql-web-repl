@@ -19,26 +19,19 @@
 		'GET nonce, balance FROM account 0x00000000219ab540356cbb839cbe05303d7705fa ON arb'
 	];
 	let currentPlaceholder = $state(0);
-	let proxyQuery = $state(query);
-	let lastWordPosition = $state(0);
-
-	$effect(() => {
-		console.log({ lastWordPosition });
-	});
-
-	$effect(() => {
-		if (!inputElement) return;
+	const lastWordPosition = $derived.by(() => {
+		if (!inputElement) return 0;
 
 		const words = query.split(' ');
 		const textBefore = words.slice(0, -1).join(' ');
 		const canvas = document.createElement('canvas');
 		const context = canvas.getContext('2d');
 
-		if (!context) return;
+		if (!context) return 0;
 
 		const computedStyle = window.getComputedStyle(inputElement);
 		context.font = computedStyle.font;
-		lastWordPosition = context.measureText(textBefore + ' ').width;
+		return context.measureText(textBefore + ' ').width;
 	});
 
 	onMount(() => {
