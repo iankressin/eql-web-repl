@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+const config = {
 	content: ['./src/**/*.{html,js,svelte,ts}'],
 	theme: {
 		fontFamily: {
@@ -11,6 +11,7 @@ export default {
 				black: '#1e2326',
 				'dim-0': '#232a2e',
 				'dim-1': '#2d353b',
+				'dim-2': '#353a3e',
 				white: '#fff8f0',
 				orange: '#e69875',
 				yellow: '#f0c674',
@@ -32,6 +33,7 @@ export default {
 				// => @media (min-width: 1280px) { ... }
 			}
 		}
-	},
-	plugins: []
+	}
 };
+
+export default config;

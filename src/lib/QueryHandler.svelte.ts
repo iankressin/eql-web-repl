@@ -15,7 +15,7 @@ interface DumpFile {
 }
 
 export class QueryHandler {
-	private static readonly API_URL = 'https://api.eql.sh/run';
+	private static readonly API_URL = 'http://localhost:8080/run';
 	public results = $state<Result[]>([]);
 	public dumpFile: DumpFile | null = $state(null);
 	private _fetchingQuery = $state(false);
