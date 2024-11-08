@@ -12,6 +12,7 @@ describe('autocomplete', () => {
 	describe('GET keyword', () => {
 		it('return suggestions for GET ', () =>
 			expect(autocomplete('GET ')).toEqual([
+				'*',
 				{
 					schema: 'account',
 					fields: ['nonce', 'balance', 'code', 'chain']
@@ -79,8 +80,8 @@ describe('autocomplete', () => {
 			]));
 
 		it('suggest operators for fields', () => {
-			expect(autocomplete('GET * FROM log WHERE topic0')).toEqual(['=']);
-			expect(autocomplete('GET * FROM tx WHERE value')).toEqual(allOperators);
+			expect(autocomplete('GET * FROM log WHERE topic0 ')).toEqual(['=']);
+			expect(autocomplete('GET * FROM tx WHERE value ')).toEqual(allOperators);
 		});
 
 		it('continue suggesting fields after the first filter filled', () =>

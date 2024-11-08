@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
+	import { isQueryComplete, parseQuery } from '$lib/helpers/parser';
 
 	let {
 		query = $bindable(),
@@ -61,9 +62,16 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.key === 'Enter' && query !== '') {
-			// onsubmit(query);
-			// updateQueryString();
+		if (
+			event.key === 'Enter' &&
+			isQueryComplete(query) &&
+			!query.endsWith(',') &&
+			!query.endsWith(', ')
+		) {
+			event.preventDefault();
+			event.stopPropagation();
+			onsubmit(query);
+			updateQueryString();
 			query = '';
 		} else if (event.key === 'ArrowDown' || (event.ctrlKey && event.key === 'n')) {
 			event.preventDefault();
@@ -91,6 +99,7 @@
 			class="w-full bg-dim-1 focus:outline-none"
 			placeholder={placeholders[currentPlaceholder]}
 			onkeydown={handleKeyDown}
+			id="query-input"
 		/>
 	</Autocomplete>
 </div>

@@ -19,6 +19,7 @@ export type Suggestion = SuggestionWithFields | string;
 
 export const keywordSuggestions: Record<Keywords, Suggestion[]> = {
 	GET: [
+		'*',
 		{
 			schema: 'account',
 			fields: ['nonce', 'balance', 'code', 'chain']
@@ -49,16 +50,14 @@ const entityFromSuggestions: Record<Entities, string[]> = {
 };
 
 export function autocomplete(query: string): Suggestion[] {
+	const parsedQuery = parseQuery(query);
 	// Autocomplete only shows suggestions after a keyword and a space. This feels more natural for the user.
 	const lastWord = query.trim().split(' ').pop();
 	const lastWordRaw = query.split(' ').pop();
+
 	if (keywords.includes(lastWordRaw as Keywords)) return [];
 
-	const parsedQuery = parseQuery(query);
-
-	if (!parsedQuery.lastKeyword) {
-		return ['GET'];
-	}
+	if (!parsedQuery.lastKeyword) return ['GET'];
 
 	if (parsedQuery.lastKeyword === 'GET') {
 		if (parsedQuery.fields?.length && query.endsWith(' ') && !query.endsWith(', ')) {
@@ -68,7 +67,11 @@ export function autocomplete(query: string): Suggestion[] {
 		const lastField = parsedQuery.fields?.at(-1);
 		const restFields = parsedQuery.fields?.slice(0, -1);
 
-		if (query.endsWith(',') || (lastWordRaw && allEntityFields.includes(lastWordRaw))) {
+		if (
+			query.endsWith(',') ||
+			(lastWordRaw && allEntityFields.includes(lastWordRaw)) ||
+			lastWord === '*'
+		) {
 			return [];
 		}
 
@@ -156,6 +159,7 @@ export function autocomplete(query: string): Suggestion[] {
 			return ['ON'];
 		}
 
+		// GET * FROM tx WHERE value = 123
 		if (query.endsWith(',') || (lastFilter?.value && lastWord === lastFilter.value)) return [];
 
 		if (
@@ -174,7 +178,13 @@ export function autocomplete(query: string): Suggestion[] {
 		}
 
 		const lastChar = query.at(-1);
-		if (lastFilter && !lastFilter.value && lastChar && !allOperators.includes(lastChar)) {
+		if (
+			lastFilter &&
+			!lastFilter.value &&
+			lastChar &&
+			!allOperators.includes(lastChar) &&
+			query.endsWith(' ')
+		) {
 			const operators =
 				entityFilters[parsedQuery.entity].find((filter) => filter.field === lastFilter.field)
 					?.operators || [];

@@ -215,3 +215,9 @@ function parseOnChain(onPart: string, currentQuery: ParsedQuery) {
 	const validChains = chainsList.filter((chain) => chains.includes(chain as Chain));
 	currentQuery.chains = validChains.length > 0 ? (validChains as Chain[]) : null;
 }
+
+export function isQueryComplete(query: string): boolean {
+	const parsedQuery = parseQuery(query);
+
+	return parsedQuery.entity !== null && parsedQuery.fields !== null && parsedQuery.chains !== null;
+}
