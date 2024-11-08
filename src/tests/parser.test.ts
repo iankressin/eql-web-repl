@@ -7,7 +7,7 @@ describe('parseQuery', () => {
 			fields: ['hash', 'number'],
 			entity: 'block',
 			filters: ['number > 1000000'],
-			chain: 'eth',
+			chains: ['eth'],
 			lastKeyword: 'ON'
 		});
 	});
@@ -17,7 +17,7 @@ describe('parseQuery', () => {
 			fields: ['hash', 'number'],
 			entity: 'block',
 			filters: ['number > 1000000'],
-			chain: null,
+			chains: null,
 			lastKeyword: 'WHERE'
 		});
 	});
@@ -27,7 +27,7 @@ describe('parseQuery', () => {
 			fields: ['hash', 'number'],
 			entity: 'block',
 			filters: ['number > 1000000', 'hash = 0x123'],
-			chain: null,
+			chains: null,
 			lastKeyword: 'WHERE'
 		});
 	});
@@ -37,7 +37,7 @@ describe('parseQuery', () => {
 			fields: ['hash', 'number'],
 			entity: 'block',
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'FROM'
 		});
 	});
@@ -47,7 +47,7 @@ describe('parseQuery', () => {
 			fields: ['nonce', 'balance'],
 			entity: 'account',
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'GET'
 		});
 	});
@@ -57,7 +57,7 @@ describe('parseQuery', () => {
 			fields: ['nonce'],
 			entity: null,
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'GET'
 		});
 	});
@@ -67,7 +67,7 @@ describe('parseQuery', () => {
 			fields: ['balance', 'non'],
 			entity: 'account',
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'GET'
 		});
 	});
@@ -77,7 +77,7 @@ describe('parseQuery', () => {
 			fields: ['nonce', 'balance'],
 			entity: 'account',
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'GET'
 		});
 	});
@@ -87,7 +87,7 @@ describe('parseQuery', () => {
 			fields: ['nonce', 'topics'],
 			entity: null,
 			filters: null,
-			chain: null,
+			chains: null,
 			lastKeyword: 'GET'
 		});
 	});
@@ -96,7 +96,7 @@ describe('parseQuery', () => {
 		expect(parseQuery('GET * FROM block 10:1000')).toEqual({
 			fields: ['*'],
 			entity: 'block',
-			chain: null,
+			chains: null,
 			filters: null,
 			lastKeyword: 'FROM'
 		});
@@ -106,8 +106,20 @@ describe('parseQuery', () => {
 		expect(parseQuery('GET * FROM block 10:1000 ON')).toEqual({
 			fields: ['*'],
 			entity: 'block',
-			chain: null,
+			chains: null,
 			filters: null,
+			lastKeyword: 'ON'
+		});
+	});
+
+	it('should parse query with multiple chains', () => {
+		expect(
+			parseQuery('GET hash, number FROM block WHERE number > 1000000 ON eth, polygon')
+		).toEqual({
+			fields: ['hash', 'number'],
+			entity: 'block',
+			filters: ['number > 1000000'],
+			chains: ['eth', 'polygon'],
 			lastKeyword: 'ON'
 		});
 	});

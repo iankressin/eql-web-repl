@@ -50,7 +50,13 @@
 
 	function handleWindowKeyDown(event: KeyboardEvent) {
 		if (event.ctrlKey) return;
-		if ((/^[a-zA-Z0-9 ,]$/.test(event.key) || event.key === 'Backspace') && inputElement)
+		if (
+			(/^[a-zA-Z0-9 ,]$/.test(event.key) ||
+				event.key === 'Backspace' ||
+				event.key === 'ArrowLeft' ||
+				event.key === 'ArrowRight') &&
+			inputElement
+		)
 			inputElement.focus();
 	}
 

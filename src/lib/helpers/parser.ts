@@ -2,6 +2,7 @@ export const keywords = ['GET', 'FROM', 'WHERE', 'ON'] as const;
 export type Keywords = (typeof keywords)[number];
 
 export const chains = [
+	'*',
 	'eth',
 	'arb',
 	'op',
@@ -15,8 +16,9 @@ export const chains = [
 	'celo',
 	'avalanche'
 ] as const;
+export const chainsWithoutWildcard = chains.filter((chain) => chain !== '*');
 type Entity = 'account' | 'block' | 'tx' | 'log';
-type Chain = (typeof chains)[number];
+export type Chain = (typeof chains)[number];
 
 export const entityFields: Record<Entity, string[]> = {
 	account: ['nonce', 'balance', 'code', 'chain'],
@@ -24,6 +26,8 @@ export const entityFields: Record<Entity, string[]> = {
 	tx: ['hash', 'nonce', 'from', 'to', 'value', 'gas', 'gasprice', 'input', 'status'],
 	log: ['address', 'topics', 'data', 'block', 'transaction', 'index']
 } as const;
+
+export const allEntityFields = Object.values(entityFields).flat();
 
 export const entityFilters: Record<Entity, string[]> = {
 	account: entityFields.account,
@@ -36,7 +40,7 @@ export interface ParsedQuery {
 	entity: Entity | null;
 	fields: (typeof entityFields)[Entity] | null;
 	filters: (typeof entityFilters)[Entity] | null;
-	chain: Chain | null;
+	chains: Chain[] | null;
 	lastKeyword: Keywords | null;
 }
 
@@ -44,7 +48,7 @@ const defaultQuery: ParsedQuery = {
 	entity: null,
 	fields: null,
 	filters: null,
-	chain: null,
+	chains: null,
 	lastKeyword: null
 };
 
@@ -144,8 +148,11 @@ function parseWhereFilters(wherePart: string, currentQuery: ParsedQuery) {
 }
 
 function parseOnChain(onPart: string, currentQuery: ParsedQuery) {
-	const chain = onPart.trim().toLowerCase();
-	if (chains.includes(chain as Chain)) {
-		currentQuery.chain = chain as Chain;
-	}
+	const chainsList = onPart
+		.split(',')
+		.map((c) => c.trim().toLowerCase())
+		.filter((c) => c !== '');
+
+	const validChains = chainsList.filter((chain) => chains.includes(chain as Chain));
+	currentQuery.chains = validChains.length > 0 ? (validChains as Chain[]) : null;
 }

@@ -1,4 +1,14 @@
-import { chains, entityFields, entityFilters, keywords, parseQuery, type Keywords } from './parser';
+import {
+	allEntityFields,
+	chains,
+	chainsWithoutWildcard,
+	entityFields,
+	entityFilters,
+	keywords,
+	parseQuery,
+	type Chain,
+	type Keywords
+} from './parser';
 
 const entities = ['account', 'block', 'tx', 'log'] as const;
 type Entities = (typeof entities)[number];
@@ -6,7 +16,7 @@ type Entities = (typeof entities)[number];
 export type SuggestionWithFields = { schema: Entities; fields: string[] };
 export type Suggestion = SuggestionWithFields | string;
 
-export const suggestions: Record<Keywords, Suggestion[]> = {
+export const keywordSuggestions: Record<Keywords, Suggestion[]> = {
 	GET: [
 		{
 			schema: 'account',
@@ -30,6 +40,13 @@ export const suggestions: Record<Keywords, Suggestion[]> = {
 	ON: ['eth', 'arb', 'op', 'base', 'sepolia']
 } as const;
 
+const entitySuggestions: Record<Entities, string[]> = {
+	tx: ['WHERE', '0x'],
+	log: ['WHERE'],
+	account: ['.eth', '0x'],
+	block: ['1', '1:10', 'latest', 'pending', 'finalized', 'earliest']
+};
+
 export function autocomplete(query: string): Suggestion[] {
 	// Autocomplete only shows suggestions after a keyword and a space. This feels more natural for the user.
 	const lastWord = query.trim().split(' ').pop();
@@ -43,42 +60,70 @@ export function autocomplete(query: string): Suggestion[] {
 	}
 
 	if (parsedQuery.lastKeyword === 'GET') {
-		// Suggest FROM if fields are provided and query doesn't end with comma
 		if (parsedQuery.fields?.length && query.endsWith(' ') && !query.endsWith(', ')) {
 			return ['FROM'];
 		}
 
 		const lastField = parsedQuery.fields?.at(-1);
+		const restFields = parsedQuery.fields?.slice(0, -1);
 
-		// If entity is known, filter its fields
+		if (query.endsWith(',') || (lastWordRaw && allEntityFields.includes(lastWordRaw))) {
+			return [];
+		}
+
 		if (parsedQuery.entity) {
 			const entityFieldList = entityFields[parsedQuery.entity];
 
-			// If user is typing a field, suggest matching fields
 			if (lastField && !entityFieldList.includes(lastField)) {
 				return entityFieldList.filter((field) => field.includes(lastField));
 			}
 
-			// Otherwise suggest remaining unused fields
 			return entityFieldList.filter((field) => !parsedQuery.fields?.includes(field));
 		}
 
 		// If no entity but fields exist, suggest matching fields across all entities
 		if (lastField) {
-			return suggestions[parsedQuery.lastKeyword].filter((suggestion) =>
-				typeof suggestion === 'string'
-					? suggestion.includes(lastField)
-					: suggestion.fields.some((field) => field.includes(lastField))
-			) as Suggestion[];
+			const filteredSuggestions = keywordSuggestions[parsedQuery.lastKeyword].filter(
+				(suggestion) => {
+					if (typeof suggestion === 'string') {
+						return suggestion.startsWith(lastField);
+					}
+					return (
+						suggestion.fields.some((field) => field.startsWith(lastField)) &&
+						restFields?.every((f) => suggestion.fields.includes(f))
+					);
+				}
+			);
+
+			const filtered = filteredSuggestions.map((suggestion) => {
+				if (!isSuggestionWithFields(suggestion)) return suggestion;
+
+				return {
+					...suggestion,
+					fields:
+						lastWordRaw === ''
+							? suggestion.fields
+							: suggestion.fields.filter((field) => field.startsWith(lastField))
+				};
+			});
+
+			if (filtered.length === 1 && isSuggestionWithFields(filtered[0])) {
+				return filtered[0].fields;
+			}
+
+			return filtered;
 		}
 
-		// Default to showing all GET suggestions
-		return suggestions[parsedQuery.lastKeyword];
+		return keywordSuggestions[parsedQuery.lastKeyword];
 	}
 
 	if (parsedQuery.lastKeyword === 'FROM') {
 		if (!parsedQuery.entity) {
-			return suggestions[parsedQuery.lastKeyword];
+			return keywordSuggestions[parsedQuery.lastKeyword];
+		}
+
+		if (parsedQuery.entity && query.endsWith(`${parsedQuery.entity} `)) {
+			return entitySuggestions[parsedQuery.entity];
 		}
 
 		if (lastWord === 'FROM') {
@@ -101,8 +146,32 @@ export function autocomplete(query: string): Suggestion[] {
 	}
 
 	if (parsedQuery.lastKeyword === 'ON') {
-		return ['*', ...chains];
+		if (parsedQuery.chains?.length && query.endsWith(' ') && !query.endsWith(', ')) {
+			return ['>>'];
+		}
+
+		if (lastWord === 'ON') {
+			return [...chains];
+		}
+
+		if (query.endsWith(',') || lastWord === '*' || chains.includes(lastWord as Chain)) {
+			return [];
+		}
+
+		if (lastWord === '*') {
+			return [];
+		}
+
+		if (lastWordRaw && !chainsWithoutWildcard.some((chain) => chain === lastWordRaw)) {
+			return chainsWithoutWildcard.filter((chain) => chain.startsWith(lastWordRaw));
+		}
+
+		return [...chainsWithoutWildcard].filter((chain) => !parsedQuery.chains?.includes(chain));
 	}
 
 	return [];
+}
+
+export function isSuggestionWithFields(suggestion: Suggestion): suggestion is SuggestionWithFields {
+	return typeof suggestion === 'object' && 'fields' in suggestion;
 }
