@@ -1,5 +1,6 @@
 import {
 	allEntityFields,
+	allOperators,
 	chains,
 	chainsWithoutWildcard,
 	entityFields,
@@ -40,7 +41,7 @@ export const keywordSuggestions: Record<Keywords, Suggestion[]> = {
 	ON: ['eth', 'arb', 'op', 'base', 'sepolia']
 } as const;
 
-const entitySuggestions: Record<Entities, string[]> = {
+const entityFromSuggestions: Record<Entities, string[]> = {
 	tx: ['WHERE', '0x'],
 	log: ['WHERE'],
 	account: ['.eth', '0x'],
@@ -119,14 +120,19 @@ export function autocomplete(query: string): Suggestion[] {
 
 	if (parsedQuery.lastKeyword === 'FROM') {
 		if (!parsedQuery.entity) {
-			return keywordSuggestions[parsedQuery.lastKeyword];
+			const queryFields = parsedQuery.fields;
+			return queryFields && !queryFields.includes('*')
+				? entities.filter((entity) =>
+						entityFields[entity].some((field) => queryFields?.includes(field))
+					)
+				: keywordSuggestions[parsedQuery.lastKeyword];
 		}
 
 		if (parsedQuery.entity && query.endsWith(`${parsedQuery.entity} `)) {
-			return entitySuggestions[parsedQuery.entity];
+			return entityFromSuggestions[parsedQuery.entity];
 		}
 
-		if (lastWord === 'FROM') {
+		if (lastWord === 'FROM' && parsedQuery.entity) {
 			return [parsedQuery.entity];
 		}
 
@@ -141,8 +147,43 @@ export function autocomplete(query: string): Suggestion[] {
 		return [];
 	}
 
-	if (parsedQuery.lastKeyword === 'WHERE' && parsedQuery.entity) {
-		return entityFilters[parsedQuery.entity];
+	if (parsedQuery.lastKeyword === 'WHERE') {
+		if (!parsedQuery.entity) throw Error('WHERE keyword requires an entity');
+
+		const lastFilter = parsedQuery.filters?.at(-1);
+		const entityFilterFields = entityFilters[parsedQuery.entity].map((f) => f.field);
+		if (lastFilter?.operator && lastFilter?.value && query.endsWith(' ') && !query.endsWith(', ')) {
+			return ['ON'];
+		}
+
+		if (query.endsWith(',') || (lastFilter?.value && lastWord === lastFilter.value)) return [];
+
+		if (
+			lastFilter &&
+			!lastFilter.operator &&
+			!lastFilter.value &&
+			!entityFilterFields.includes(lastFilter.field)
+		) {
+			return entityFilters[parsedQuery.entity]
+				.filter((f) => f.field.startsWith(lastFilter.field))
+				.map((f) => f.field);
+		}
+
+		if (/[=!<>]\s*$/.test(query)) {
+			return [];
+		}
+
+		const lastChar = query.at(-1);
+		if (lastFilter && !lastFilter.value && lastChar && !allOperators.includes(lastChar)) {
+			const operators =
+				entityFilters[parsedQuery.entity].find((filter) => filter.field === lastFilter.field)
+					?.operators || [];
+
+			if (!operators) throw Error(`Operators not found for filter ${lastFilter}`);
+			return operators;
+		}
+
+		return entityFilterFields;
 	}
 
 	if (parsedQuery.lastKeyword === 'ON') {

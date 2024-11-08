@@ -2,37 +2,50 @@ import { describe, it, expect } from 'vitest';
 import { parseQuery } from '$lib/helpers/parser';
 
 describe('parseQuery', () => {
-	it('should parse full query', () => {
-		expect(parseQuery('GET hash, number FROM block WHERE number > 1000000 ON eth')).toEqual({
-			fields: ['hash', 'number'],
-			entity: 'block',
-			filters: ['number > 1000000'],
+	it('parse full query', () => {
+		expect(parseQuery('GET hash, value FROM tx WHERE value > 1000000 ON eth')).toEqual({
+			fields: ['hash', 'value'],
+			entity: 'tx',
+			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: ['eth'],
 			lastKeyword: 'ON'
 		});
 	});
 
-	it('should parse query with filters', () => {
-		expect(parseQuery('GET hash, number FROM block WHERE number > 1000000')).toEqual({
-			fields: ['hash', 'number'],
-			entity: 'block',
-			filters: ['number > 1000000'],
+	it('parse query with filters', () => {
+		expect(parseQuery('GET hash, value FROM tx WHERE value > 1000000')).toEqual({
+			fields: ['hash', 'value'],
+			entity: 'tx',
+			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: null,
 			lastKeyword: 'WHERE'
 		});
 	});
 
-	it('should parse multiple filters', () => {
-		expect(parseQuery('GET hash, number FROM block WHERE number > 1000000, hash = 0x123')).toEqual({
-			fields: ['hash', 'number'],
-			entity: 'block',
-			filters: ['number > 1000000', 'hash = 0x123'],
+	it('parse multiple filters', () => {
+		expect(parseQuery('GET hash, value FROM tx WHERE value > 1000000, from = 0x123')).toEqual({
+			fields: ['hash', 'value'],
+			entity: 'tx',
+			filters: [
+				{ field: 'value', operator: '>', value: '1000000' },
+				{ field: 'from', operator: '=', value: '0x123' }
+			],
 			chains: null,
 			lastKeyword: 'WHERE'
 		});
 	});
 
-	it('should parse query with chain', () => {
+	it('partially fill filters', () => {
+		expect(parseQuery('GET hash, value FROM tx WHERE value')).toEqual({
+			fields: ['hash', 'value'],
+			entity: 'tx',
+			filters: [{ field: 'value', operator: null, value: null }],
+			chains: null,
+			lastKeyword: 'WHERE'
+		});
+	});
+
+	it('parse query with chain', () => {
 		expect(parseQuery('GET hash, number FROM block')).toEqual({
 			fields: ['hash', 'number'],
 			entity: 'block',
@@ -42,7 +55,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it('should parse query with fields', () => {
+	it('parse query with fields', () => {
 		expect(parseQuery('GET nonce, balance')).toEqual({
 			fields: ['nonce', 'balance'],
 			entity: 'account',
@@ -52,7 +65,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it.only('should return null for entity when field has collision between entities', () => {
+	it('return null for entity when field has collision between entities', () => {
 		expect(parseQuery('GET nonce')).toEqual({
 			fields: ['nonce'],
 			entity: null,
@@ -62,7 +75,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it.only('should return entity when field is mid-word', () => {
+	it('return entity when field is mid-word', () => {
 		expect(parseQuery('GET balance, non')).toEqual({
 			fields: ['balance', 'non'],
 			entity: 'account',
@@ -72,7 +85,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it('should parse query with fields ending with a comma', () => {
+	it('parse query with fields ending with a comma', () => {
 		expect(parseQuery('GET nonce, balance,')).toEqual({
 			fields: ['nonce', 'balance'],
 			entity: 'account',
@@ -82,7 +95,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it("should return null to entity if fields doens't match any entity", () => {
+	it("return null to entity if fields doens't match any entity", () => {
 		expect(parseQuery('GET nonce, topics')).toEqual({
 			fields: ['nonce', 'topics'],
 			entity: null,
@@ -92,7 +105,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it('should parse entity with wildcard', () => {
+	it('parse entity with wildcard', () => {
 		expect(parseQuery('GET * FROM block 10:1000')).toEqual({
 			fields: ['*'],
 			entity: 'block',
@@ -102,7 +115,7 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it('should parse ON keyword when no chain was specified', () => {
+	it('parse ON keyword when no chain was specified', () => {
 		expect(parseQuery('GET * FROM block 10:1000 ON')).toEqual({
 			fields: ['*'],
 			entity: 'block',
@@ -112,13 +125,11 @@ describe('parseQuery', () => {
 		});
 	});
 
-	it('should parse query with multiple chains', () => {
-		expect(
-			parseQuery('GET hash, number FROM block WHERE number > 1000000 ON eth, polygon')
-		).toEqual({
-			fields: ['hash', 'number'],
-			entity: 'block',
-			filters: ['number > 1000000'],
+	it('parse query with multiple chains', () => {
+		expect(parseQuery('GET hash, value FROM tx WHERE value > 1000000 ON eth, polygon')).toEqual({
+			fields: ['hash', 'value'],
+			entity: 'tx',
+			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: ['eth', 'polygon'],
 			lastKeyword: 'ON'
 		});
