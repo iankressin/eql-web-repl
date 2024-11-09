@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
-	import { isQueryComplete, parseQuery } from '$lib/helpers/parser';
+	import { isQueryComplete } from '$lib/helpers/parser';
 
 	let {
 		query = $bindable(),
@@ -15,8 +15,10 @@
 	let inputElement: HTMLInputElement | null = $state(null);
 	const placeholders = [
 		'GET * FROM account vitalik.eth ON base',
+		'GET from, to, value, hash, chain FROM tx WHERE block = latest, value > 0 ON eth, base, op',
+		'GET hash, timestamp, size FROM block 123847 ON polygon >> blocks.json',
+		'GET * FROM log WHERE event_signature = Transfer(address,address,uint256) ON arb',
 		'GET from, to, value FROM tx 0xa50a9587ca01ac32590d3bf4dcb8c012166f18845ef170ef149d76bde100430b  ON eth',
-		'GET hash, timestamp, size FROM block 123847 ON polygon > blocks.json',
 		'GET nonce, balance FROM account 0x00000000219ab540356cbb839cbe05303d7705fa ON arb'
 	];
 	let currentPlaceholder = $state(0);
@@ -50,7 +52,7 @@
 	});
 
 	function handleWindowKeyDown(event: KeyboardEvent) {
-		if (event.ctrlKey) return;
+		// if (event.ctrlKey) return;
 		if (
 			(/^[a-zA-Z0-9 ,]$/.test(event.key) ||
 				event.key === 'Backspace' ||
@@ -88,18 +90,46 @@
 		const params = new URLSearchParams(location.search);
 		query = params.get('query') || '';
 	});
+
+	function getTextWidth(text: string, font: string) {
+		const canvas = document.createElement('canvas');
+		const context = canvas.getContext('2d');
+		if (!context) return 0;
+		context.font = font;
+		return context.measureText(text || ' ').width;
+	}
+
+	function getDiffFromSuggestion(hoverdSuggestion: string): string {
+		const lastWord = query.split(' ').pop() || '';
+		if (!hoverdSuggestion.startsWith(lastWord)) return '';
+		return hoverdSuggestion.slice(lastWord.length);
+	}
+
+	$effect(() => {
+		if (inputElement) {
+			const computedStyle = window.getComputedStyle(inputElement);
+			const width = getTextWidth(query || inputElement.placeholder, computedStyle.font);
+			inputElement.style.width = query ? `${width}px` : '100%';
+		}
+	});
 </script>
 
 <div class="px-8 text-2xl gap-4 flex justify-center relative">
 	<span class="text-pink whitespace-nowrap italic"> EQL > </span>
 	<Autocomplete bind:value={query} containerPosition={lastWordPosition}>
-		<input
-			bind:this={inputElement}
-			bind:value={query}
-			class="w-full bg-dim-1 focus:outline-none"
-			placeholder={placeholders[currentPlaceholder]}
-			onkeydown={handleKeyDown}
-			id="query-input"
-		/>
+		{#snippet input(hoveredSuggestion: string)}
+			<div class="flex">
+				<input
+					bind:this={inputElement}
+					bind:value={query}
+					class="bg-transparent focus:outline-none min-w-0 w-full"
+					placeholder={placeholders[currentPlaceholder]}
+					onkeydown={handleKeyDown}
+					id="query-input"
+					autocomplete="off"
+				/>
+				<span class="text-gray">{getDiffFromSuggestion(hoveredSuggestion)}</span>
+			</div>
+		{/snippet}
 	</Autocomplete>
 </div>

@@ -60,7 +60,10 @@ export function autocomplete(query: string): Suggestion[] {
 	if (!parsedQuery.lastKeyword) return ['GET'];
 
 	if (parsedQuery.lastKeyword === 'GET') {
-		if (parsedQuery.fields?.length && query.endsWith(' ') && !query.endsWith(', ')) {
+		if (
+			(parsedQuery.fields?.length && query.endsWith(' ') && !query.endsWith(', ')) ||
+			(lastWordRaw && 'FROM'.startsWith(lastWordRaw))
+		) {
 			return ['FROM'];
 		}
 
@@ -140,11 +143,14 @@ export function autocomplete(query: string): Suggestion[] {
 		}
 
 		if (
-			!entities.includes(lastWord as Entities) &&
-			!keywords.includes(lastWord as Keywords) &&
-			query.endsWith(' ')
+			(!entities.includes(lastWord as Entities) &&
+				!keywords.includes(lastWord as Keywords) &&
+				query.endsWith(' ')) ||
+			(lastWordRaw && ('WHERE'.startsWith(lastWordRaw) || 'ON'.startsWith(lastWordRaw)))
 		) {
-			return ['WHERE', 'ON'];
+			return parsedQuery.entity === 'account' || parsedQuery.entity === 'block'
+				? ['ON']
+				: ['WHERE', 'ON'].filter((keyword) => lastWordRaw && keyword.startsWith(lastWordRaw));
 		}
 
 		return [];
@@ -160,7 +166,12 @@ export function autocomplete(query: string): Suggestion[] {
 		}
 
 		// GET * FROM tx WHERE value = 123
-		if (query.endsWith(',') || (lastFilter?.value && lastWord === lastFilter.value)) return [];
+		if (
+			query.endsWith(',') ||
+			(lastFilter?.value && lastWord === lastFilter.value) ||
+			(lastWordRaw && entityFilterFields.includes(lastWordRaw))
+		)
+			return [];
 
 		if (
 			lastFilter &&

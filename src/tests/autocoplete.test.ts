@@ -51,11 +51,10 @@ describe('autocomplete', () => {
 		it('return only one suggestion for FROM when fields are provided', () =>
 			expect(autocomplete('GET nonce, balance FROM ')).toEqual(['account']));
 
-		it('suggest WHERE if entity and entity_id are provided', () =>
-			expect(autocomplete('GET nonce, balance FROM account vitalik.eth ')).toEqual([
-				'WHERE',
-				'ON'
-			]));
+		it('suggest WHERE if entity and entity_id are provided, and if entity accepts filters', () => {
+			expect(autocomplete('GET nonce, balance FROM account vitalik.eth ')).toEqual(['ON']);
+			expect(autocomplete('GET nonce, balance FROM tx ')).toEqual(['WHERE', '0x']);
+		});
 
 		it('suggest account ids and .eth if entity is account', () =>
 			expect(autocomplete('GET nonce, balance FROM account ')).toEqual(['.eth', '0x']));
@@ -104,8 +103,10 @@ describe('autocomplete', () => {
 		it('suggest operators if filter already has an operator', () =>
 			expect(autocomplete('GET * FROM tx WHERE value =')).toEqual([]));
 
-		it('not suggest filter fields if last characters are not comma plus space', () =>
-			expect(autocomplete('GET * FROM tx WHERE value = 123')).toEqual([]));
+		it('not suggest filter fields if last characters are not comma plus space', () => {
+			expect(autocomplete('GET * FROM tx WHERE value = 123')).toEqual([]);
+			expect(autocomplete('GET * FROM tx WHERE value')).toEqual([]);
+		});
 	});
 
 	describe('ON keyword', () => {
