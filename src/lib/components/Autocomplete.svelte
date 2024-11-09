@@ -24,6 +24,21 @@
 	const currentSuggestions = $derived(suggestionsVisible ? autocomplete(value) : []);
 	const lastWord = $derived(value.split(' ').pop());
 
+	$effect(() => {
+		const lastWord = value.split(' ').pop() || '';
+		if (lastWord.match(/^get$/i)) value = value.slice(0, -lastWord.length) + 'GET';
+		if (lastWord.match(/^where$/i)) value = value.slice(0, -lastWord.length) + 'WHERE';
+		if (lastWord.match(/^on$/i)) value = value.slice(0, -lastWord.length) + 'ON';
+		// To avoid collision if from field of Transaction entity
+		// - if it's the second from in the query
+		// - if it's not the second word in the query
+		if (
+			lastWord.match(/^from$/i) &&
+			(value.split(' ').length > 2 || value.toLowerCase().split('from').length > 2)
+		)
+			value = value.slice(0, -lastWord.length) + 'FROM';
+	});
+
 	onMount(() => {
 		window.addEventListener('keydown', handleKeyDown);
 

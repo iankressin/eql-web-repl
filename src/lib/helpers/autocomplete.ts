@@ -63,7 +63,9 @@ export function autocomplete(query: string): Suggestion[] {
 	if (parsedQuery.lastKeyword === 'GET') {
 		if (
 			(parsedQuery.fields?.length && query.endsWith(' ') && !query.endsWith(', ')) ||
-			(lastWordRaw && 'FROM'.startsWith(lastWordRaw))
+			(lastWordRaw && 'FROM'.startsWith(lastWordRaw)) ||
+			(lastWordRaw && 'from'.startsWith(lastWordRaw) && query.split(' ').length > 2) ||
+			query.toLowerCase().split('from').length > 2
 		) {
 			return ['FROM'];
 		}
@@ -154,13 +156,17 @@ export function autocomplete(query: string): Suggestion[] {
 			(!entities.includes(lastWord as Entities) &&
 				!keywords.includes(lastWord as Keywords) &&
 				query.endsWith(' ')) ||
-			(lastWordRaw && ('WHERE'.startsWith(lastWordRaw) || 'ON'.startsWith(lastWordRaw)))
+			(lastWordRaw &&
+				('WHERE'.toLowerCase().startsWith(lastWordRaw.toLowerCase()) ||
+					'ON'.toLowerCase().startsWith(lastWordRaw.toLowerCase())))
 		) {
 			// TODO: this rule should be removed as soon as filter are implemented for all entities
 			// Implementation still missing at the language level for blocks and accounts
 			return parsedQuery.entity === 'account' || parsedQuery.entity === 'block'
 				? ['ON']
-				: ['WHERE', 'ON'].filter((keyword) => lastWordRaw && keyword.startsWith(lastWordRaw));
+				: ['WHERE', 'ON'].filter(
+						(keyword) => lastWordRaw && keyword.toLowerCase().startsWith(lastWordRaw.toLowerCase())
+					);
 		}
 
 		return [];
