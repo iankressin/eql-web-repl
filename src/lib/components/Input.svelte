@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
+	import { highlightKeywords } from '$lib/utils/index.svelte';
 
 	let {
 		query,
@@ -19,6 +20,10 @@
 	];
 	let currentPlaceholder = $state(0);
 
+	let styledQuery = $state(query);
+
+	let splitQuery = $derived(query.split(' '));
+
 	onMount(() => {
 		inputElement.focus();
 
@@ -32,6 +37,7 @@
 			onsubmit(query);
 			updateQueryString();
 			query = '';
+			styledQuery = '';
 		}
 	}
 
@@ -43,16 +49,30 @@
 	onMount(() => {
 		const params = new URLSearchParams(location.search);
 		query = params.get('query') || '';
+		styledQuery = highlightKeywords(splitQuery);
 	});
 </script>
 
 <div class="p-8 text-2xl gap-4 flex justify-center items-center">
 	<span class="text-pink whitespace-nowrap italic"> EQL > </span>
-	<input
-		bind:this={inputElement}
-		bind:value={query}
-		class="w-full bg-dim-1 focus:outline-none"
-		placeholder={placeholders[currentPlaceholder]}
-		onkeypress={handleKeyPress}
-	/>
+	<div class="relative w-full">
+		<div
+			contenteditable
+			role="textbox"
+			bind:textContent={query}
+			bind:innerHTML={styledQuery}
+			spellcheck="false"
+			class="w-fit bg-dim-1 focus:outline-none absolute z-10 text-white"
+		></div>
+		<input
+			bind:this={inputElement}
+			bind:value={query}
+			class="w-full bg-dim-1 focus:outline-none"
+			placeholder={placeholders[currentPlaceholder]}
+			onkeypress={handleKeyPress}
+			oninput={() => {
+				styledQuery = highlightKeywords(splitQuery);
+			}}
+		/>
+	</div>
 </div>
