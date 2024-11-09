@@ -4,6 +4,7 @@
 	import { openModal } from '$lib/stores/modal.svelte';
 	import Share from './Share.svelte';
 	import Spinner from './Spinner.svelte';
+	import { highlightKeywords } from '$lib/utils/index.svelte';
 
 	let lastItem = $derived(queryHandler.results.length);
 	let fetching = $derived(queryHandler.fetchingQuery);
@@ -36,7 +37,7 @@
 			<div class="flex flex-col gap-2" class:last={index === queryHandler.results.length - 1}>
 				<div>
 					<span class="text-lg">
-						> {result.query}
+						> {@html highlightKeywords(result.query.split(' '))}
 						<button
 							onclick={() => openModal(shareQuery, { dismissible: true, param: result.query })}
 							class="text-gray text-sm">Share</button
