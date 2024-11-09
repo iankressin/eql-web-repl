@@ -2,9 +2,9 @@
 	import {
 		autocomplete,
 		isSuggestionWithFields,
-		type Suggestion,
-		type SuggestionWithFields
+		keywordSuggestions
 	} from '$lib/helpers/autocomplete';
+	import { repositionCursor } from '$lib/helpers/reposition-cursor';
 	import { ChevronRightIcon } from 'lucide-svelte';
 	import { onMount, type Snippet } from 'svelte';
 
@@ -81,26 +81,13 @@
 		words.pop();
 
 		words.push(suggestion);
-		if (suggestion === '.eth') {
-			repositionCursor(words, 0);
+		if (suggestion === '.eth' || keywordSuggestions['>>'].includes(suggestion)) {
+			const input = document.getElementById('query-input') as HTMLInputElement;
+			repositionCursor(input, 0);
 		}
 
 		value = words.join(' ');
 		resetFocus();
-	}
-
-	function repositionCursor(words: string[], newPositionOffset: number) {
-		const input = document.getElementById('query-input') as HTMLInputElement;
-		const currentPosition = input.selectionStart || 0;
-		const newPosition = currentPosition + newPositionOffset;
-
-		value = words.join(' ');
-
-		setTimeout(() => {
-			input.focus();
-			input.setSelectionRange(newPosition, newPosition);
-		}, 0);
-		return;
 	}
 
 	function updateFocusedItem(direction: number) {

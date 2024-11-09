@@ -1,4 +1,4 @@
-export const keywords = ['GET', 'FROM', 'WHERE', 'ON'] as const;
+export const keywords = ['GET', 'FROM', 'WHERE', 'ON', '>>'] as const;
 export type Keywords = (typeof keywords)[number];
 
 export const chains = [
@@ -80,6 +80,7 @@ export interface ParsedQuery {
 	filters: Filter[] | null;
 	chains: Chain[] | null;
 	lastKeyword: Keywords | null;
+	dump: string | null;
 }
 
 const defaultQuery: ParsedQuery = {
@@ -87,7 +88,8 @@ const defaultQuery: ParsedQuery = {
 	fields: null,
 	filters: null,
 	chains: null,
-	lastKeyword: null
+	lastKeyword: null,
+	dump: null
 };
 
 // TODO: should consider wildcard (*) operators for fields and chains
@@ -99,7 +101,7 @@ export function parseQuery(query: string): ParsedQuery {
 		return defaultQuery;
 	}
 
-	const parts = query.split(/\s+(FROM|WHERE|ON)(?:\s+|$)/);
+	const parts = query.split(/\s+(FROM|WHERE|ON|>>)(?:\s+|$)/);
 
 	if (parts[0].startsWith('GET')) {
 		currentQuery.lastKeyword = 'GET';
@@ -121,6 +123,12 @@ export function parseQuery(query: string): ParsedQuery {
 		currentQuery.lastKeyword = 'ON';
 		const onIndex = parts.indexOf('ON');
 		parseOnChain(parts[onIndex + 1], currentQuery);
+	}
+
+	if (parts.includes('>>')) {
+		const dumpIndex = parts.indexOf('>>');
+		currentQuery.lastKeyword = '>>';
+		parseDump(parts[dumpIndex + 1], currentQuery);
 	}
 
 	return currentQuery;
@@ -175,19 +183,20 @@ function parseFromEntity(fromPart: string, currentQuery: ParsedQuery) {
 }
 
 function parseWhereFilters(wherePart: string, currentQuery: ParsedQuery) {
-	const filtersList = wherePart
-		.split(',')
-		.map((f) => f.trim())
-		.filter((f) => f !== '');
+	const filtersList =
+		wherePart
+			.match(/(?:[^,()]|\([^)]*\))+/g)
+			?.map((f) => f.trim())
+			.filter((f) => f !== '') || [];
 
 	const parsedFilters = filtersList
-		.map((filterStr) => parseFilter(filterStr, currentQuery.entity))
+		.map((filterStr) => parseFilter(filterStr))
 		.filter((f): f is Filter => f !== null);
 
 	currentQuery.filters = parsedFilters.length > 0 ? parsedFilters : null;
 }
 
-function parseFilter(filterStr: string, entity: Entity | null): Filter | null {
+function parseFilter(filterStr: string): Filter | null {
 	const fullMatch = filterStr.match(/(\w+)\s*([=!<>]+[=]?)\s*(.+)/);
 	const fieldOnlyMatch = filterStr.match(/^(\w+)$/);
 	const fieldAndOperatorMatch = filterStr.match(/(\w+)\s*([=!<>]+[=]?)$/);
@@ -214,6 +223,10 @@ function parseOnChain(onPart: string, currentQuery: ParsedQuery) {
 
 	const validChains = chainsList.filter((chain) => chains.includes(chain as Chain));
 	currentQuery.chains = validChains.length > 0 ? (validChains as Chain[]) : null;
+}
+
+function parseDump(dumpPart: string, currentQuery: ParsedQuery) {
+	currentQuery.dump = dumpPart;
 }
 
 export function isQueryComplete(query: string): boolean {

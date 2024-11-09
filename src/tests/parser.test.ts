@@ -8,7 +8,8 @@ describe('parseQuery', () => {
 			entity: 'tx',
 			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: ['eth'],
-			lastKeyword: 'ON'
+			lastKeyword: 'ON',
+			dump: null
 		});
 	});
 
@@ -18,7 +19,8 @@ describe('parseQuery', () => {
 			entity: 'tx',
 			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: null,
-			lastKeyword: 'WHERE'
+			lastKeyword: 'WHERE',
+			dump: null
 		});
 	});
 
@@ -31,7 +33,8 @@ describe('parseQuery', () => {
 				{ field: 'from', operator: '=', value: '0x123' }
 			],
 			chains: null,
-			lastKeyword: 'WHERE'
+			lastKeyword: 'WHERE',
+			dump: null
 		});
 	});
 
@@ -41,7 +44,8 @@ describe('parseQuery', () => {
 			entity: 'tx',
 			filters: [{ field: 'value', operator: null, value: null }],
 			chains: null,
-			lastKeyword: 'WHERE'
+			lastKeyword: 'WHERE',
+			dump: null
 		});
 	});
 
@@ -51,7 +55,8 @@ describe('parseQuery', () => {
 			entity: 'block',
 			filters: null,
 			chains: null,
-			lastKeyword: 'FROM'
+			lastKeyword: 'FROM',
+			dump: null
 		});
 	});
 
@@ -61,7 +66,8 @@ describe('parseQuery', () => {
 			entity: 'account',
 			filters: null,
 			chains: null,
-			lastKeyword: 'GET'
+			lastKeyword: 'GET',
+			dump: null
 		});
 	});
 
@@ -71,7 +77,8 @@ describe('parseQuery', () => {
 			entity: null,
 			filters: null,
 			chains: null,
-			lastKeyword: 'GET'
+			lastKeyword: 'GET',
+			dump: null
 		});
 	});
 
@@ -81,7 +88,8 @@ describe('parseQuery', () => {
 			entity: 'account',
 			filters: null,
 			chains: null,
-			lastKeyword: 'GET'
+			lastKeyword: 'GET',
+			dump: null
 		});
 	});
 
@@ -91,7 +99,8 @@ describe('parseQuery', () => {
 			entity: 'account',
 			filters: null,
 			chains: null,
-			lastKeyword: 'GET'
+			lastKeyword: 'GET',
+			dump: null
 		});
 	});
 
@@ -101,7 +110,8 @@ describe('parseQuery', () => {
 			entity: null,
 			filters: null,
 			chains: null,
-			lastKeyword: 'GET'
+			lastKeyword: 'GET',
+			dump: null
 		});
 	});
 
@@ -111,7 +121,8 @@ describe('parseQuery', () => {
 			entity: 'block',
 			chains: null,
 			filters: null,
-			lastKeyword: 'FROM'
+			lastKeyword: 'FROM',
+			dump: null
 		});
 	});
 
@@ -121,7 +132,8 @@ describe('parseQuery', () => {
 			entity: 'block',
 			chains: null,
 			filters: null,
-			lastKeyword: 'ON'
+			lastKeyword: 'ON',
+			dump: null
 		});
 	});
 
@@ -131,7 +143,32 @@ describe('parseQuery', () => {
 			entity: 'tx',
 			filters: [{ field: 'value', operator: '>', value: '1000000' }],
 			chains: ['eth', 'polygon'],
-			lastKeyword: 'ON'
+			lastKeyword: 'ON',
+			dump: null
 		});
 	});
+
+	it('parse event_signature correctly', () =>
+		expect(
+			parseQuery('GET * FROM log WHERE event_signature = Transfer(address,address,uint)')
+		).toEqual({
+			fields: ['*'],
+			entity: 'log',
+			filters: [
+				{ field: 'event_signature', operator: '=', value: 'Transfer(address,address,uint)' }
+			],
+			chains: null,
+			lastKeyword: 'WHERE',
+			dump: null
+		}));
+
+	it('parse query with dump', () =>
+		expect(parseQuery('GET * FROM account vitalik.eth ON eth >> vitalik.json')).toEqual({
+			fields: ['*'],
+			entity: 'account',
+			chains: ['eth'],
+			lastKeyword: '>>',
+			filters: null,
+			dump: 'vitalik.json'
+		}));
 });

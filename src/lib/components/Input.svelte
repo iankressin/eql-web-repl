@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
 	import { isQueryComplete } from '$lib/helpers/parser';
+	import { repositionCursor } from '$lib/helpers/reposition-cursor';
 
 	let {
 		query = $bindable(),
@@ -52,8 +53,13 @@
 	});
 
 	function handleWindowKeyDown(event: KeyboardEvent) {
-		// if (event.ctrlKey) return;
-		if (
+		if (event.key === '(') {
+			setTimeout(() => {
+				const input = document.getElementById('query-input') as HTMLInputElement;
+				query += ')';
+				repositionCursor(input, 0);
+			});
+		} else if (
 			(/^[a-zA-Z0-9 ,]$/.test(event.key) ||
 				event.key === 'Backspace' ||
 				event.key === 'ArrowLeft' ||
@@ -115,7 +121,7 @@
 </script>
 
 <div class="px-8 text-2xl gap-4 flex justify-center relative">
-	<span class="text-pink whitespace-nowrap italic"> EQL > </span>
+	<span class="text-pink whitespace-nowrap italic">EQL > </span>
 	<Autocomplete bind:value={query} containerPosition={lastWordPosition}>
 		{#snippet input(hoveredSuggestion: string)}
 			<div class="flex">

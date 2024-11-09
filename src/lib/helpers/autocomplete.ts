@@ -39,7 +39,8 @@ export const keywordSuggestions: Record<Keywords, Suggestion[]> = {
 	],
 	FROM: ['account', 'block', 'tx', 'log'],
 	WHERE: [],
-	ON: ['eth', 'arb', 'op', 'base', 'sepolia']
+	ON: ['eth', 'arb', 'op', 'base', 'sepolia'],
+	'>>': ['.json', '.csv', '.parquet']
 } as const;
 
 const entityFromSuggestions: Record<Entities, string[]> = {
@@ -131,10 +132,17 @@ export function autocomplete(query: string): Suggestion[] {
 				? entities.filter((entity) =>
 						entityFields[entity].some((field) => queryFields?.includes(field))
 					)
-				: keywordSuggestions[parsedQuery.lastKeyword];
+				: keywordSuggestions.FROM.filter(
+						(entity) =>
+							lastWordRaw === '' ||
+							(typeof entity === 'string' && lastWord && entity.startsWith(lastWord))
+					);
 		}
 
-		if (parsedQuery.entity && query.endsWith(`${parsedQuery.entity} `)) {
+		if (
+			(parsedQuery.entity && query.endsWith(`${parsedQuery.entity} `)) ||
+			(query.endsWith(', ') && lastWord && !entities.includes(lastWord as Entities))
+		) {
 			return entityFromSuggestions[parsedQuery.entity];
 		}
 
@@ -148,6 +156,8 @@ export function autocomplete(query: string): Suggestion[] {
 				query.endsWith(' ')) ||
 			(lastWordRaw && ('WHERE'.startsWith(lastWordRaw) || 'ON'.startsWith(lastWordRaw)))
 		) {
+			// TODO: this rule should be removed as soon as filter are implemented for all entities
+			// Implementation still missing at the language level for blocks and accounts
 			return parsedQuery.entity === 'account' || parsedQuery.entity === 'block'
 				? ['ON']
 				: ['WHERE', 'ON'].filter((keyword) => lastWordRaw && keyword.startsWith(lastWordRaw));
@@ -165,9 +175,8 @@ export function autocomplete(query: string): Suggestion[] {
 			return ['ON'];
 		}
 
-		// GET * FROM tx WHERE value = 123
 		if (
-			query.endsWith(',') ||
+			/[,()]$/.test(query) ||
 			(lastFilter?.value && lastWord === lastFilter.value) ||
 			(lastWordRaw && entityFilterFields.includes(lastWordRaw))
 		)
@@ -204,7 +213,9 @@ export function autocomplete(query: string): Suggestion[] {
 			return operators;
 		}
 
-		return entityFilterFields;
+		return entityFilterFields.filter(
+			(filter) => !parsedQuery.filters?.some((parsedFilter) => parsedFilter.field === filter)
+		);
 	}
 
 	if (parsedQuery.lastKeyword === 'ON') {
@@ -229,6 +240,12 @@ export function autocomplete(query: string): Suggestion[] {
 		}
 
 		return [...chainsWithoutWildcard].filter((chain) => !parsedQuery.chains?.includes(chain));
+	}
+
+	if (parsedQuery.lastKeyword === '>>') {
+		if (query.endsWith(' ')) {
+			return keywordSuggestions['>>'];
+		}
 	}
 
 	return [];
