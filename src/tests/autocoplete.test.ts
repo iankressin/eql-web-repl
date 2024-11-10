@@ -134,6 +134,9 @@ describe('autocomplete', () => {
 			expect(
 				autocomplete('GET * FROM log WHERE event_signature = Transfer(address,address,uint) ')
 			).not.toEqual(['=']));
+
+		it('not suggest anything if word is not an operator', () =>
+			expect(autocomplete('GET * FROM tx WHERE value helloworld')).toEqual([]));
 	});
 
 	describe('ON keyword', () => {

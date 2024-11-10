@@ -214,6 +214,7 @@ function parseFilter(filterStr: string): Filter | null {
 	const fullMatch = filterStr.match(/(\w+)\s*([=!<>]+[=]?)\s*(.+)/);
 	const fieldOnlyMatch = filterStr.match(/^(\w+)$/);
 	const fieldAndOperatorMatch = filterStr.match(/(\w+)\s*([=!<>]+[=]?)$/);
+	const errorMatch = filterStr.match(/\w+\s+\w+/);
 
 	if (fullMatch) {
 		const [, field, operator, value] = fullMatch;
@@ -224,6 +225,12 @@ function parseFilter(filterStr: string): Filter | null {
 	} else if (fieldOnlyMatch) {
 		const [, field] = fieldOnlyMatch;
 		return { field, operator: null, value: null };
+	} else if (errorMatch) {
+		return {
+			field: errorMatch[0],
+			operator: null,
+			value: null
+		};
 	}
 
 	return null;
@@ -235,8 +242,7 @@ function parseOnChain(onPart: string, currentQuery: ParsedQuery) {
 		.map((c) => c.trim().toLowerCase())
 		.filter((c) => c !== '');
 
-	const validChains = chainsList.filter((chain) => chains.includes(chain as Chain));
-	currentQuery.chains = validChains.length > 0 ? (validChains as Chain[]) : null;
+	currentQuery.chains = chainsList.length > 0 ? (chainsList as Chain[]) : null;
 }
 
 function parseDump(dumpPart: string, currentQuery: ParsedQuery) {
@@ -275,7 +281,7 @@ function checkQueryErrors(
 				start: query.indexOf(currentQuery.entity),
 				end: query.indexOf(currentQuery.entity) + currentQuery.entity.length
 			},
-			message: `Invalid entity ${currentQuery.entity}`
+			message: `Invalid entity "${currentQuery.entity}"`
 		};
 	}
 
@@ -291,7 +297,7 @@ function checkQueryErrors(
 							start: query.indexOf(field),
 							end: query.indexOf(field) + field.length
 						},
-						message: `Invalid field ${field} for entity ${currentQuery.entity}`
+						message: `Invalid field "${field}" for entity "${currentQuery.entity}"`
 					};
 				}
 			}
@@ -303,7 +309,26 @@ function checkQueryErrors(
 							start: query.indexOf(field),
 							end: query.indexOf(field) + field.length
 						},
-						message: `Invalid field ${field}`
+						message: `Invalid field "${field}"`
+					};
+				}
+			}
+		}
+
+		// Validate filters
+		if (currentQuery.filters && currentQuery.filters.length > 0) {
+			for (const filter of currentQuery.filters) {
+				if (
+					filter.field &&
+					currentQuery.entity &&
+					!entityFilters[currentQuery.entity].some((f) => f.field === filter.field)
+				) {
+					return {
+						position: {
+							start: query.indexOf(filter.field),
+							end: query.indexOf(filter.field) + filter.field.length
+						},
+						message: `Invalid filter "${filter.field}" for entity "${currentQuery.entity}"`
 					};
 				}
 			}
@@ -313,32 +338,13 @@ function checkQueryErrors(
 	// Validate chains
 	if (currentQuery.chains && currentQuery.chains.length > 0) {
 		for (const chain of currentQuery.chains) {
-			if (!chains.includes(chain)) {
+			if (!chains.some((c) => c.startsWith(chain))) {
 				return {
 					position: {
 						start: query.indexOf(chain),
 						end: query.indexOf(chain) + chain.length
 					},
-					message: `Invalid chain ${chain}`
-				};
-			}
-		}
-	}
-
-	// Validate filters
-	if (currentQuery.filters && currentQuery.filters.length > 0) {
-		for (const filter of currentQuery.filters) {
-			if (
-				filter.field &&
-				currentQuery.entity &&
-				!entityFilters[currentQuery.entity].some((f) => f.field === filter.field)
-			) {
-				return {
-					position: {
-						start: query.indexOf(filter.field),
-						end: query.indexOf(filter.field) + filter.field.length
-					},
-					message: `Invalid filter ${filter.field} for entity ${currentQuery.entity}`
+					message: `Invalid chain "${chain}"`
 				};
 			}
 		}

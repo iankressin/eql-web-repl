@@ -135,24 +135,28 @@ export function autocomplete(query: string): Suggestion[] {
 	}
 
 	if (parsedQuery.lastKeyword === 'FROM') {
-		if (!parsedQuery.entity || !isEntityValid(parsedQuery.entity)) {
-			const queryFields = parsedQuery.fields;
+		const hasValidEntity = parsedQuery.entity && isEntityValid(parsedQuery.entity);
+		const queryFields = parsedQuery.fields;
 
-			return queryFields && !queryFields.includes('*')
-				? entities.filter((entity) =>
-						queryFields?.every((field) => entityFields[entity].includes(field))
-					)
-				: keywordSuggestions.FROM.filter(
-						(entity) =>
-							lastWordRaw === '' ||
-							(typeof entity === 'string' && lastWord && entity.startsWith(lastWord))
-					);
+		if (!hasValidEntity) {
+			const hasSpecificFields = queryFields && !queryFields.includes('*');
+			if (hasSpecificFields) {
+				return entities.filter((entity) =>
+					queryFields.every((field) => entityFields[entity].includes(field))
+				);
+			}
+			return keywordSuggestions.FROM.filter(
+				(entity) =>
+					lastWordRaw === '' ||
+					(typeof entity === 'string' && lastWord && entity.startsWith(lastWord))
+			);
 		}
 
-		if (
-			(parsedQuery.entity && query.endsWith(`${parsedQuery.entity} `)) ||
-			(query.endsWith(', ') && lastWord && !entities.includes(lastWord as Entities))
-		) {
+		const isEntityComplete = query.endsWith(`${parsedQuery.entity} `);
+		const isCommaAfterInvalidEntity =
+			query.endsWith(', ') && lastWord && !entities.includes(lastWord as Entities);
+
+		if (parsedQuery.entity && (isEntityComplete || isCommaAfterInvalidEntity)) {
 			return entityFromSuggestions[parsedQuery.entity];
 		}
 
@@ -160,17 +164,21 @@ export function autocomplete(query: string): Suggestion[] {
 			return [parsedQuery.entity];
 		}
 
-		if (
-			(!entities.includes(lastWord as Entities) &&
-				!keywords.includes(lastWord as Keywords) &&
-				query.endsWith(' ')) ||
-			(lastWordRaw &&
-				('WHERE'.toLowerCase().startsWith(lastWordRaw.toLowerCase()) ||
-					'ON'.toLowerCase().startsWith(lastWordRaw.toLowerCase())))
-		) {
-			// TODO: this rule should be removed as soon as filter are implemented for all entities
-			// Implementation still missing at the language level for blocks and accounts
-			return parsedQuery.entity === 'account' || parsedQuery.entity === 'block'
+		const isReadyForNextKeyword =
+			!entities.includes(lastWord as Entities) &&
+			!keywords.includes(lastWord as Keywords) &&
+			query.endsWith(' ');
+
+		const isPartialKeyword =
+			lastWordRaw &&
+			('WHERE'.toLowerCase().startsWith(lastWordRaw.toLowerCase()) ||
+				'ON'.toLowerCase().startsWith(lastWordRaw.toLowerCase()));
+
+		if (isReadyForNextKeyword || isPartialKeyword) {
+			const isEntityWithoutFilters =
+				parsedQuery.entity === 'account' || parsedQuery.entity === 'block';
+
+			return isEntityWithoutFilters
 				? ['ON']
 				: ['WHERE', 'ON'].filter(
 						(keyword) => lastWordRaw && keyword.toLowerCase().startsWith(lastWordRaw.toLowerCase())
@@ -185,51 +193,47 @@ export function autocomplete(query: string): Suggestion[] {
 
 		const lastFilter = parsedQuery.filters?.at(-1);
 		const entityFilterFields = entityFilters[parsedQuery.entity].map((f) => f.field);
-		if (lastFilter?.operator && lastFilter?.value && query.endsWith(' ') && !query.endsWith(', ')) {
+
+		const isFilterComplete = lastFilter?.operator && lastFilter?.value && query.endsWith(' ');
+		if (isFilterComplete && !query.endsWith(', ')) {
 			return ['ON'];
 		}
 
-		if (
-			/[,()]$/.test(query) ||
-			(lastFilter?.value && lastWord === lastFilter.value) ||
-			(lastWordRaw && entityFilterFields.includes(lastWordRaw))
-		)
+		const isFilterTerminated = /[,()]$/.test(query);
+		const isValueComplete = lastFilter?.value && lastWord === lastFilter.value;
+		const isFieldComplete = lastWordRaw && entityFilterFields.includes(lastWordRaw);
+		if (isFilterTerminated || isValueComplete || isFieldComplete) {
 			return [];
+		}
 
-		if (
-			lastFilter &&
-			!lastFilter.operator &&
-			!lastFilter.value &&
-			!entityFilterFields.includes(lastFilter.field)
-		) {
+		const isPartialField = lastFilter && !lastFilter.operator && !lastFilter.value;
+		if (isPartialField && !entityFilterFields.includes(lastFilter.field)) {
 			return entityFilters[parsedQuery.entity]
 				.filter((f) => f.field.startsWith(lastFilter.field))
 				.map((f) => f.field);
 		}
 
-		if (/[=!<>]\s*$/.test(query)) {
+		const hasOperatorAtEnd = /[=!<>]\s*$/.test(query);
+		if (hasOperatorAtEnd) {
 			return [];
 		}
 
 		const lastChar = query.at(-1);
-		if (
-			lastFilter &&
-			!lastFilter.value &&
-			lastChar &&
-			!allOperators.includes(lastChar) &&
-			query.endsWith(' ')
-		) {
-			const operators =
-				entityFilters[parsedQuery.entity].find((filter) => filter.field === lastFilter.field)
-					?.operators || [];
+		const shouldShowOperators = lastFilter && !lastFilter.value && lastChar && query.endsWith(' ');
+		if (shouldShowOperators && !allOperators.includes(lastChar)) {
+			const filterDef = entityFilters[parsedQuery.entity].find(
+				(filter) => filter.field === lastFilter.field
+			);
+			const operators = filterDef?.operators || [];
 
-			if (!operators) throw Error(`Operators not found for filter ${lastFilter}`);
+			if (!operators.length) throw Error(`Operators not found for filter ${lastFilter}`);
 			return operators;
 		}
 
-		return entityFilterFields.filter(
-			(filter) => !parsedQuery.filters?.some((parsedFilter) => parsedFilter.field === filter)
+		const unusedFields = entityFilterFields.filter(
+			(field) => !parsedQuery.filters?.some((filter) => filter.field === field)
 		);
+		return unusedFields;
 	}
 
 	if (parsedQuery.lastKeyword === 'ON') {

@@ -211,18 +211,36 @@ describe('parseQuery - errors', () => {
 			})
 		).toEqual({
 			position: { start: 33, end: 39 },
-			message: 'Invalid filter valuex for entity tx'
+			message: 'Invalid filter "valuex" for entity "tx"'
 		}));
 
 	it('error when field is invalid', () =>
 		expect(parseQuery('GET asdf FROM account ', { validatePartial: true })).toEqual({
 			position: { start: 4, end: 8 },
-			message: 'Invalid field asdf for entity account'
+			message: 'Invalid field "asdf" for entity "account"'
 		}));
 
 	it('error when entity is invalid', () =>
 		expect(parseQuery('GET * FROM asdf ', { validatePartial: true })).toEqual({
 			position: { start: 11, end: 15 },
-			message: 'Invalid entity asdf'
+			message: 'Invalid entity "asdf"'
+		}));
+
+	it('error when query does not start with GET', () =>
+		expect(parseQuery('some_other_word ', { validatePartial: true })).toEqual({
+			position: { start: 0, end: 16 },
+			message: 'Query must start with GET'
+		}));
+
+	it('error when chain is invalid', () =>
+		expect(parseQuery('GET * FROM block ON invalid_chain', { validatePartial: true })).toEqual({
+			position: { start: 20, end: 33 },
+			message: 'Invalid chain "invalid_chain"'
+		}));
+
+	it('error when filter operator is invalid', () =>
+		expect(parseQuery('GET * FROM tx WHERE value a ', { validatePartial: true })).toEqual({
+			position: { start: 20, end: 27 },
+			message: 'Invalid filter "value a" for entity "tx"'
 		}));
 });
