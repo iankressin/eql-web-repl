@@ -1,8 +1,10 @@
 export const keywords = ['GET', 'FROM', 'WHERE', 'ON', '>>'] as const;
 export type Keywords = (typeof keywords)[number];
 
+export const WILDCARD = '*';
+
 export const chains = [
-	'*',
+	WILDCARD,
 	'eth',
 	'arb',
 	'op',
@@ -16,9 +18,10 @@ export const chains = [
 	'celo',
 	'avalanche'
 ] as const;
-export const chainsWithoutWildcard = chains.filter((chain) => chain !== '*');
+export const chainsWithoutWildcard = chains.filter((chain) => chain !== WILDCARD);
 
-type Entity = 'account' | 'block' | 'tx' | 'log';
+const entities = ['account', 'block', 'tx', 'log'] as const;
+type Entity = (typeof entities)[number];
 export type Chain = (typeof chains)[number];
 
 export const entityFields: Record<Entity, string[]> = {
@@ -83,6 +86,13 @@ export interface ParsedQuery {
 	dump: string | null;
 }
 
+export interface QueryError {
+	position: { start: number; end: number } | null;
+	message: string;
+}
+
+export type QueryResult = ParsedQuery | QueryError;
+
 const defaultQuery: ParsedQuery = {
 	entity: null,
 	fields: null,
@@ -92,9 +102,13 @@ const defaultQuery: ParsedQuery = {
 	dump: null
 };
 
-// TODO: should consider wildcard (*) operators for fields and chains
-export function parseQuery(query: string): ParsedQuery {
+interface Options {
+	validatePartial?: boolean;
+}
+
+export function parseQuery(query: string, options: Options = {}): QueryResult {
 	let currentQuery: ParsedQuery = { ...defaultQuery };
+	const rawQuery = query;
 
 	query = query.trim();
 	if (query === '') {
@@ -131,7 +145,9 @@ export function parseQuery(query: string): ParsedQuery {
 		parseDump(parts[dumpIndex + 1], currentQuery);
 	}
 
-	return currentQuery;
+	const error = checkQueryErrors(currentQuery, rawQuery, options.validatePartial ?? false);
+
+	return error ?? currentQuery;
 }
 
 function parseGetFields(getPart: string, currentQuery: ParsedQuery) {
@@ -139,8 +155,8 @@ function parseGetFields(getPart: string, currentQuery: ParsedQuery) {
 		const fieldsStr = getPart.replace('GET ', '').trim();
 
 		// Don't try to determine entity from fields when using wildcard
-		if (fieldsStr === '*') {
-			currentQuery.fields = ['*'] as any;
+		if (fieldsStr === WILDCARD) {
+			currentQuery.fields = [WILDCARD] as any;
 			return;
 		}
 
@@ -177,9 +193,7 @@ function parseGetFields(getPart: string, currentQuery: ParsedQuery) {
 
 function parseFromEntity(fromPart: string, currentQuery: ParsedQuery) {
 	const entity = fromPart.trim().toLowerCase().split(' ')[0];
-	if (Object.keys(entityFields).includes(entity)) {
-		currentQuery.entity = entity as Entity;
-	}
+	currentQuery.entity = entity as Entity;
 }
 
 function parseWhereFilters(wherePart: string, currentQuery: ParsedQuery) {
@@ -229,8 +243,114 @@ function parseDump(dumpPart: string, currentQuery: ParsedQuery) {
 	currentQuery.dump = dumpPart;
 }
 
-export function isQueryComplete(query: string): boolean {
-	const parsedQuery = parseQuery(query);
+export function isQueryComplete(parsedQuery: QueryResult): boolean {
+	if (isQueryError(parsedQuery)) {
+		return false;
+	}
 
 	return parsedQuery.entity !== null && parsedQuery.fields !== null && parsedQuery.chains !== null;
+}
+
+function checkQueryErrors(
+	currentQuery: ParsedQuery,
+	query: string,
+	validatePartial: boolean
+): QueryError | null {
+	const shouldValidateWhenPartial =
+		validatePartial && (isQueryComplete(currentQuery) || query.endsWith(' '));
+
+	if (!shouldValidateWhenPartial) return null;
+
+	if (!query.startsWith('GET ')) {
+		return {
+			position: { start: 0, end: query.length },
+			message: 'Query must start with GET'
+		};
+	}
+
+	// Validate entity
+	if (currentQuery.entity && !isEntityValid(currentQuery.entity)) {
+		return {
+			position: {
+				start: query.indexOf(currentQuery.entity),
+				end: query.indexOf(currentQuery.entity) + currentQuery.entity.length
+			},
+			message: `Invalid entity ${currentQuery.entity}`
+		};
+	}
+
+	// Validate fields
+	if (currentQuery.fields) {
+		if (currentQuery.entity) {
+			const fields = entityFields[currentQuery.entity];
+
+			for (const field of currentQuery.fields) {
+				if (!fields.includes(field) && field !== WILDCARD) {
+					return {
+						position: {
+							start: query.indexOf(field),
+							end: query.indexOf(field) + field.length
+						},
+						message: `Invalid field ${field} for entity ${currentQuery.entity}`
+					};
+				}
+			}
+		} else {
+			for (const field of currentQuery.fields) {
+				if (!allEntityFields.includes(field) && field !== WILDCARD) {
+					return {
+						position: {
+							start: query.indexOf(field),
+							end: query.indexOf(field) + field.length
+						},
+						message: `Invalid field ${field}`
+					};
+				}
+			}
+		}
+	}
+
+	// Validate chains
+	if (currentQuery.chains && currentQuery.chains.length > 0) {
+		for (const chain of currentQuery.chains) {
+			if (!chains.includes(chain)) {
+				return {
+					position: {
+						start: query.indexOf(chain),
+						end: query.indexOf(chain) + chain.length
+					},
+					message: `Invalid chain ${chain}`
+				};
+			}
+		}
+	}
+
+	// Validate filters
+	if (currentQuery.filters && currentQuery.filters.length > 0) {
+		for (const filter of currentQuery.filters) {
+			if (
+				filter.field &&
+				currentQuery.entity &&
+				!entityFilters[currentQuery.entity].some((f) => f.field === filter.field)
+			) {
+				return {
+					position: {
+						start: query.indexOf(filter.field),
+						end: query.indexOf(filter.field) + filter.field.length
+					},
+					message: `Invalid filter ${filter.field} for entity ${currentQuery.entity}`
+				};
+			}
+		}
+	}
+
+	return null;
+}
+
+export function isEntityValid(entity: Entity) {
+	return entities.includes(entity);
+}
+
+export function isQueryError(parsedQuery: QueryResult): parsedQuery is QueryError {
+	return 'position' in parsedQuery && 'message' in parsedQuery;
 }

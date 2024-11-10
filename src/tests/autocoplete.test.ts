@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { allOperators, chains, chainsWithoutWildcard } from '$lib/helpers/parser';
 import { autocomplete } from '$lib/helpers/autocomplete';
 
-describe.skip('autocomplete', () => {
+describe('autocomplete', () => {
 	describe('empty query', () => {
 		it('return suggestions for empty query', () => {
 			expect(autocomplete('')).toEqual(['GET']);
@@ -53,14 +53,14 @@ describe.skip('autocomplete', () => {
 
 		it('suggest WHERE if entity and entity_id are provided, and if entity accepts filters', () => {
 			expect(autocomplete('GET nonce, balance FROM account vitalik.eth ')).toEqual(['ON']);
-			expect(autocomplete('GET nonce, balance FROM tx ')).toEqual(['WHERE', '0x']);
+			expect(autocomplete('GET hash, from, to, value FROM tx ')).toEqual(['WHERE', '0x']);
 		});
 
 		it('suggest account ids and .eth if entity is account', () =>
 			expect(autocomplete('GET nonce, balance FROM account ')).toEqual(['.eth', '0x']));
 
 		it('suggest WHERE if entity is log', () =>
-			expect(autocomplete('GET nonce, balance FROM log ')).toEqual(['WHERE']));
+			expect(autocomplete('GET * FROM log ')).toEqual(['WHERE']));
 
 		it('only suggest entities which contain the specified fields', () =>
 			expect(autocomplete('GET nonce FROM ')).toEqual(['account', 'tx']));

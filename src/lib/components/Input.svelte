@@ -3,7 +3,7 @@
 	import { page } from '$app/stores';
 	import { onMount, tick } from 'svelte';
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
-	import { isQueryComplete } from '$lib/helpers/parser';
+	import { isQueryComplete, isQueryError, parseQuery } from '$lib/helpers/parser';
 	import { repositionCursor } from '$lib/helpers/reposition-cursor';
 
 	let {
@@ -23,6 +23,7 @@
 		'GET nonce, balance FROM account 0x00000000219ab540356cbb839cbe05303d7705fa ON arb'
 	];
 	let currentPlaceholder = $state(0);
+	const parsedQuery = $derived(parseQuery(query, { validatePartial: true }));
 	const lastWordPosition = $derived.by(() => {
 		if (!inputElement) return 0;
 
@@ -72,7 +73,7 @@
 	function handleKeyDown(event: KeyboardEvent) {
 		if (
 			event.key === 'Enter' &&
-			isQueryComplete(query) &&
+			isQueryComplete(parsedQuery) &&
 			!query.endsWith(',') &&
 			!query.endsWith(', ')
 		) {
@@ -125,16 +126,32 @@
 	<Autocomplete bind:value={query} containerPosition={lastWordPosition}>
 		{#snippet input(hoveredSuggestion: string)}
 			<div class="flex">
-				<input
-					bind:this={inputElement}
-					bind:value={query}
-					class="bg-transparent focus:outline-none min-w-0 w-full"
-					placeholder={placeholders[currentPlaceholder]}
-					onkeydown={handleKeyDown}
-					id="query-input"
-					autocomplete="off"
-				/>
-				<span class="text-gray">{getDiffFromSuggestion(hoveredSuggestion)}</span>
+				<div class="relative w-full flex">
+					<input
+						bind:this={inputElement}
+						bind:value={query}
+						class="bg-transparent focus:outline-none min-w-0 w-full"
+						placeholder={placeholders[currentPlaceholder]}
+						onkeydown={handleKeyDown}
+						id="query-input"
+						autocomplete="off"
+						spellcheck="false"
+					/>
+					<span class="text-gray">{getDiffFromSuggestion(hoveredSuggestion)}</span>
+					{#if isQueryError(parsedQuery) && parsedQuery.position}
+						<div class="absolute top-0 pointer-events-none group" style="left: 0">
+							<span class="text-transparent">{query.slice(0, parsedQuery.position.start)}</span>
+							<span class="text-transparent border-red border-b-2 group relative">
+								{query.slice(parsedQuery.position.start, parsedQuery.position.end)}
+								<div
+									class="absolute left-1/2 -translate-x-1/2 text-center text-red text-sm bg-dim-0 rounded-md p-2 mt-2 w-max max-w-[300px]"
+								>
+									{parsedQuery.message}
+								</div>
+							</span>
+						</div>
+					{/if}
+				</div>
 			</div>
 		{/snippet}
 	</Autocomplete>

@@ -2,7 +2,8 @@
 	import {
 		autocomplete,
 		isSuggestionWithFields,
-		keywordSuggestions
+		keywordSuggestions,
+		type Suggestion
 	} from '$lib/helpers/autocomplete';
 	import { repositionCursor } from '$lib/helpers/reposition-cursor';
 	import { ChevronRightIcon } from 'lucide-svelte';
@@ -188,24 +189,27 @@
 					</button>
 				{/each}
 			</div>
-
-			{#if isSuggestionWithFields(suggestion)}
-				<div class="mt-1 bg-dim-0 rounded-md shadow flex flex-col px-1 py-1 border border-dim-2">
-					{#each suggestion.fields as field, index}
-						<button
-							class="py-1 pl-1 pr-8 cursor-pointer text-base text-left rounded"
-							class:bg-dim-2={focusedContainerIndex === 1 && focusedSecondContainerIndex === index}
-							onclick={handleConfirmation}
-							onmouseenter={() => handleMouseEnterSecondContainer(index)}
-						>
-							{@render highlightedMatch(field)}
-						</button>
-					{/each}
-				</div>
-			{/if}
+			{@render highlightErrors(suggestion)}
 		</div>
 	{/if}
 </div>
+
+{#snippet highlightErrors(suggestion: Suggestion)}
+	{#if isSuggestionWithFields(suggestion)}
+		<div class="mt-1 bg-dim-0 rounded-md shadow flex flex-col px-1 py-1 border border-dim-2">
+			{#each suggestion.fields as field, index}
+				<button
+					class="py-1 pl-1 pr-8 cursor-pointer text-base text-left rounded"
+					class:bg-dim-2={focusedContainerIndex === 1 && focusedSecondContainerIndex === index}
+					onclick={handleConfirmation}
+					onmouseenter={() => handleMouseEnterSecondContainer(index)}
+				>
+					{@render highlightedMatch(field)}
+				</button>
+			{/each}
+		</div>
+	{/if}
+{/snippet}
 
 {#snippet highlightedMatch(suggestion: string)}
 	{#if lastWord}

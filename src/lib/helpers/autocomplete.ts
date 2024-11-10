@@ -5,6 +5,8 @@ import {
 	chainsWithoutWildcard,
 	entityFields,
 	entityFilters,
+	isEntityValid,
+	isQueryError,
 	keywords,
 	parseQuery,
 	type Chain,
@@ -51,7 +53,12 @@ const entityFromSuggestions: Record<Entities, string[]> = {
 };
 
 export function autocomplete(query: string): Suggestion[] {
-	const parsedQuery = parseQuery(query);
+	const parsedQuery = parseQuery(query, { validatePartial: true });
+
+	if (isQueryError(parsedQuery)) {
+		return [];
+	}
+
 	// Autocomplete only shows suggestions after a keyword and a space. This feels more natural for the user.
 	const lastWord = query.trim().split(' ').pop();
 	const lastWordRaw = query.split(' ').pop();
@@ -128,11 +135,12 @@ export function autocomplete(query: string): Suggestion[] {
 	}
 
 	if (parsedQuery.lastKeyword === 'FROM') {
-		if (!parsedQuery.entity) {
+		if (!parsedQuery.entity || !isEntityValid(parsedQuery.entity)) {
 			const queryFields = parsedQuery.fields;
+
 			return queryFields && !queryFields.includes('*')
 				? entities.filter((entity) =>
-						entityFields[entity].some((field) => queryFields?.includes(field))
+						queryFields?.every((field) => entityFields[entity].includes(field))
 					)
 				: keywordSuggestions.FROM.filter(
 						(entity) =>
@@ -234,10 +242,6 @@ export function autocomplete(query: string): Suggestion[] {
 		}
 
 		if (query.endsWith(',') || lastWord === '*' || chains.includes(lastWord as Chain)) {
-			return [];
-		}
-
-		if (lastWord === '*') {
 			return [];
 		}
 

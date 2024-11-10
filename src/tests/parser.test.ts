@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseQuery } from '$lib/helpers/parser';
 
-describe('parseQuery', () => {
+describe('parseQuery - success', () => {
 	it('parse full query', () => {
 		expect(parseQuery('GET hash, value FROM tx WHERE value > 1000000 ON eth')).toEqual({
 			fields: ['hash', 'value'],
@@ -170,5 +170,59 @@ describe('parseQuery', () => {
 			lastKeyword: '>>',
 			filters: null,
 			dump: 'vitalik.json'
+		}));
+
+	it('not return error when wildcard is used', () =>
+		expect(parseQuery('GET * FROM account ', { validatePartial: true })).toEqual({
+			chains: null,
+			dump: null,
+			entity: 'account',
+			fields: ['*'],
+			filters: null,
+			lastKeyword: 'FROM'
+		}));
+
+	it('not return error when entity is mid-word and validatePartial is true', () =>
+		expect(parseQuery('GET nonce, balance FROM acc', { validatePartial: true })).toEqual({
+			chains: null,
+			dump: null,
+			entity: 'acc',
+			fields: ['nonce', 'balance'],
+			filters: null,
+			lastKeyword: 'FROM'
+		}));
+
+	it('validate full query not ending with space', () =>
+		expect(parseQuery('GET * FROM block 10:1000 ON eth', { validatePartial: true })).toEqual({
+			fields: ['*'],
+			entity: 'block',
+			chains: ['eth'],
+			lastKeyword: 'ON',
+			filters: null,
+			dump: null
+		}));
+});
+
+describe('parseQuery - errors', () => {
+	it('error when WHERE fields are invalid', () =>
+		expect(
+			parseQuery('GET hash, from, to FROM tx WHERE valuex > 1000000, from = 0x123 ', {
+				validatePartial: true
+			})
+		).toEqual({
+			position: { start: 33, end: 39 },
+			message: 'Invalid filter valuex for entity tx'
+		}));
+
+	it('error when field is invalid', () =>
+		expect(parseQuery('GET asdf FROM account ', { validatePartial: true })).toEqual({
+			position: { start: 4, end: 8 },
+			message: 'Invalid field asdf for entity account'
+		}));
+
+	it('error when entity is invalid', () =>
+		expect(parseQuery('GET * FROM asdf ', { validatePartial: true })).toEqual({
+			position: { start: 11, end: 15 },
+			message: 'Invalid entity asdf'
 		}));
 });
