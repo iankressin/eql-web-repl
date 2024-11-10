@@ -112,12 +112,21 @@
 		return hoverdSuggestion.slice(lastWord.length);
 	}
 
-	$effect(() => {
+	function updateInputWidth() {
 		if (inputElement) {
 			const computedStyle = window.getComputedStyle(inputElement);
 			const width = getTextWidth(query || inputElement.placeholder, computedStyle.font);
 			inputElement.style.width = query ? `${width}px` : '100%';
 		}
+	}
+
+	$effect(() => {
+		updateInputWidth();
+	});
+
+	onMount(() => {
+		// TODO: this is a tempory fix to ensure the width of input when a querystring param is set
+		setTimeout(() => updateInputWidth(), 10);
 	});
 </script>
 
