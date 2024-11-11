@@ -24,19 +24,19 @@ export const keywordSuggestions: Record<Keywords, Suggestion[]> = {
 		'*',
 		{
 			schema: 'account',
-			fields: ['nonce', 'balance', 'code', 'chain']
+			fields: entityFields.account
 		},
 		{
 			schema: 'block',
-			fields: ['hash', 'number', 'timestamp', 'transactions']
+			fields: entityFields.block
 		},
 		{
 			schema: 'tx',
-			fields: ['hash', 'nonce', 'from', 'to', 'value', 'gas', 'gasprice', 'input', 'status']
+			fields: entityFields.tx
 		},
 		{
 			schema: 'log',
-			fields: ['address', 'topics', 'data', 'block', 'transaction', 'index']
+			fields: entityFields.log
 		}
 	],
 	FROM: ['account', 'block', 'tx', 'log'],
