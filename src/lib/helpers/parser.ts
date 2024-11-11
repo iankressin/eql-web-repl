@@ -26,9 +26,24 @@ export type Chain = (typeof chains)[number];
 
 export const entityFields: Record<Entity, string[]> = {
 	account: ['nonce', 'balance', 'code', 'chain'],
-	block: ['hash', 'number', 'timestamp', 'transactions'],
-	tx: ['hash', 'nonce', 'from', 'to', 'value', 'gas', 'gasprice', 'input', 'status'],
-	log: ['address', 'topics', 'data', 'block', 'transaction', 'index']
+	block: [
+		'number', 'hash', 'parent_hash', 'timestamp', 'state_root',
+		'transactions_root', 'receipts_root', 'logs_bloom', 'extra_data',
+		'mix_hash', 'total_difficulty', 'base_fee_per_gas', 'withdrawals_root',
+		'blob_gas_used', 'excess_blob_gas', 'parent_beacon_block_root',
+		'size', 'chain'
+	],
+	tx: [
+		'transaction_type', 'hash', 'from', 'to', 'data', 'value', 'fee',
+		'gas_price', 'gas', 'status', 'chain_id', 'v', 'r', 's',
+		'max_fee_per_blob_gas', 'blob_versioned_hashes', 'max_fee_per_gas',
+		'max_priority_fee_per_gas', 'access_list', 'y_parity', 'chain'
+	],
+	log: [
+		'address', 'topic0', 'topic1', 'topic2', 'topic3', 'data',
+		'block_hash', 'block_number', 'block_timestamp', 'transaction_hash',
+		'transaction_index', 'log_index', 'removed', 'chain'
+	]
 } as const;
 export const allEntityFields = Object.values(entityFields).flat();
 
@@ -58,7 +73,8 @@ export const entityFilters: Record<Entity, { field: string; operators: Operator[
 		{ field: 'max_fee_per_gas', operators: allOperators },
 		{ field: 'max_priority_fee_per_gas', operators: allOperators },
 		{ field: 'access_list', operators: equalityOperators },
-		{ field: 'y_parity', operators: equalityOperators }
+		{ field: 'y_parity', operators: equalityOperators },
+		{ field: 'status', operators: equalityOperators }
 	],
 	log: [
 		{ field: 'block', operators: ['='] },
