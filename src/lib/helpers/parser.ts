@@ -48,7 +48,7 @@ export const entityFields: Record<Entity, string[]> = {
 		'chain'
 	],
 	tx: [
-		'transaction_type',
+		'type',
 		'hash',
 		'from',
 		'to',
@@ -68,7 +68,8 @@ export const entityFields: Record<Entity, string[]> = {
 		'max_priority_fee_per_gas',
 		'access_list',
 		'y_parity',
-		'chain'
+		'chain',
+		'authorization_list'
 	],
 	log: [
 		'address',
