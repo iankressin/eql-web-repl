@@ -30,13 +30,12 @@ export class QueryHandler {
 
 			if (resContentType?.includes('application/json')) {
 				const { result, error } = (await res.json()) as ApiResponse;
-
 				if (error) {
 					this.results.push({
 						query,
 						error
 					});
-				} else if (result) {
+				} else if (this.queryHasResults(result)) {
 					this.results.push({
 						result: Object.keys(result).map((k) => result[k]),
 						query
@@ -68,6 +67,15 @@ export class QueryHandler {
 
 	public get fetchingQuery() {
 		return this._fetchingQuery;
+	}
+
+	private queryHasResults(result: Record<string, object[]>): boolean {
+		return !!(
+			(result.transaction && result.transaction.length > 0) ||
+			(result.log && result.log.length > 0) ||
+			(result.account && result.account.length > 0) ||
+			(result.block && result.block.length > 0)
+		);
 	}
 }
 

@@ -117,7 +117,8 @@ export const entityFilters: Record<Entity, { field: string; operators: Operator[
 		{ field: 'max_priority_fee_per_gas', operators: allOperators },
 		{ field: 'access_list', operators: equalityOperators },
 		{ field: 'y_parity', operators: equalityOperators },
-		{ field: 'status', operators: equalityOperators }
+		{ field: 'status', operators: equalityOperators },
+		{ field: 'type', operators: equalityOperators }
 	],
 	log: [
 		{ field: 'block', operators: ['='] },
