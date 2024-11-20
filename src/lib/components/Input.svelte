@@ -57,12 +57,14 @@
 	<span class="text-pink whitespace-nowrap italic"> EQL > </span>
 	<div class="relative w-full">
 		<div
+			tabindex="0"
 			contenteditable
 			role="textbox"
 			bind:textContent={query}
 			bind:innerHTML={styledQuery}
+			onkeypress={handleKeyPress}
 			spellcheck="false"
-			class="w-fit bg-dim-1 focus:outline-none absolute z-10 text-white"
+			class="w-fit bg-dim-1 focus:outline-none absolute z-10"
 		></div>
 		<input
 			bind:this={inputElement}
