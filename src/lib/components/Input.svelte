@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { highlightKeywords } from '$lib/utils/index.svelte';
 	import { onMount, tick } from 'svelte';
 	import Autocomplete from '$lib/components/Autocomplete.svelte';
 	import { isQueryComplete, isQueryError, parseQuery } from '$lib/helpers/parser';
@@ -38,6 +39,8 @@
 		context.font = computedStyle.font;
 		return context.measureText(textBefore + ' ').width;
 	});
+
+	let styledQuery = $derived(highlightKeywords(query.split(' ')));
 
 	onMount(() => {
 		if (inputElement) inputElement.focus();
@@ -136,6 +139,17 @@
 		{#snippet input(hoveredSuggestion: string)}
 			<div class="flex">
 				<div class="relative w-full flex">
+					<div
+						tabindex="0"
+						contenteditable
+						role="textbox"
+						bind:textContent={query}
+						onkeypress={handleKeyDown}
+						spellcheck="false"
+						class="w-fit bg-dim-1 focus:outline-none absolute z-10"
+					>
+						{@html styledQuery}
+					</div>
 					<input
 						bind:this={inputElement}
 						bind:value={query}
@@ -143,7 +157,6 @@
 						placeholder={placeholders[currentPlaceholder]}
 						onkeydown={handleKeyDown}
 						id="query-input"
-						autocomplete="off"
 						spellcheck="false"
 					/>
 					<span class="text-gray">{getDiffFromSuggestion(hoveredSuggestion)}</span>
