@@ -8,7 +8,7 @@
 
 <div class="flex flex-col justify-between h-full">
 	<div>
-		<Input {query} onsubmit={(query) => queryHandler.runQuery(query)} />
+		<Input bind:query onsubmit={(query) => queryHandler.runQuery(query)} />
 	</div>
 	<Panel />
 </div>
